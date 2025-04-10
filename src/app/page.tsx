@@ -1,107 +1,26 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import Image from "next/image";
+import Link from 'next/link';
 
 export default function Home() {
-  const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
-
-  const handleStartNewGame = () => {
-    setIsLoading(true);
-    router.push('/character');
-  };
-
-  const handleLoadGame = () => {
-    setIsLoading(true);
-    // TODO: Implement load game functionality
-  };
-
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-       
-
-
-        <div className="text-center animate-fade-in-up">
-          <h1 className="text-6xl font-orbitron mb-8">D&D AI Game</h1>
-          <p className="text-xl font-rajdhani mb-12">Choose your adventure</p>
-          
-          <div className="space-y-4">
-            <button
-              onClick={handleStartNewGame}
-              disabled={isLoading}
-              className="w-64 px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg font-rajdhani text-lg transition-colors disabled:opacity-50"
-            >
-              {isLoading ? 'Loading...' : 'Start New Game'}
-            </button>
-            
-            <button
-              onClick={handleLoadGame}
-              disabled={isLoading}
-              className="w-64 px-6 py-3 bg-gray-700 hover:bg-gray-600 rounded-lg font-rajdhani text-lg transition-colors disabled:opacity-50"
-            >
-              {isLoading ? 'Loading...' : 'Load Game'}
-            </button>
-          </div>
+    <main className="min-h-screen bg-slate-900 flex flex-col items-center justify-center p-4">
+      <div className="text-center space-y-8 max-w-2xl">
+        <h1 className="text-6xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500 animate-fade-in-up">
+          AI Parenting Simulator
+        </h1>
+        <p className="text-xl text-gray-400 animate-fade-in-up animation-delay-200">
+          Experience the challenges and joys of parenting in a unique AI-powered simulation game
+        </p>
+        <div className="animate-fade-in-up animation-delay-400">
+          <Link
+            href="/mode"
+            className="inline-flex items-center px-8 py-4 text-lg font-medium text-white bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg hover:from-blue-600 hover:to-purple-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all"
+          >
+            Let&apos;s Go
+          </Link>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+      </div>
+    </main>
   );
 }
