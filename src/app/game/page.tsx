@@ -8,6 +8,15 @@ import { saveGame, loadGame, getCurrentUser, signOut } from '@/utils/supabase/cl
 import { GameState } from '@/types/game';
 import { supabase } from '@/utils/supabase/client';
 import { fadeIn, staggerContainer } from '@/utils/motion';
+import DiceRoll from '@/components/DiceRoll';
+
+// 添加 Space Grotesk 字体导入
+import { Space_Grotesk } from 'next/font/google';
+
+const spaceGrotesk = Space_Grotesk({ 
+  subsets: ['latin'],
+  display: 'swap',
+});
 
 interface Scene {
   description: string;
@@ -64,7 +73,7 @@ export default function GamePage() {
   const [currentScene, setCurrentScene] = useState<Scene | null>(null);
   const [actionResult, setActionResult] = useState<ActionResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [diceRoll, setDiceRoll] = useState<number | null>(null);
+  const [diceValue, setDiceValue] = useState<number | null>(null);
   const [isRolling, setIsRolling] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [user, setUser] = useState<any>(null);
@@ -77,7 +86,7 @@ export default function GamePage() {
       overflow: 'hidden',
       background: 'linear-gradient(135deg, #121212 0%, #2D1F3D 50%, #1E1E1E 100%)',
       color: '#ffffff',
-      fontFamily: 'Roboto, "Segoe UI", Arial, sans-serif',
+      fontFamily: spaceGrotesk.style.fontFamily,
       position: 'relative',
       padding: '2rem 1rem',
     },
@@ -130,7 +139,8 @@ export default function GamePage() {
       fontSize: '1.75rem',
       fontWeight: 'bold',
       color: '#BB86FC',
-      letterSpacing: '-0.025em',
+      letterSpacing: '0.02em',
+      fontFamily: spaceGrotesk.style.fontFamily,
     },
     buttonContainer: {
       display: 'flex',
@@ -175,12 +185,14 @@ export default function GamePage() {
       background: 'rgba(187, 134, 252, 0.1)',
       borderRadius: '0.75rem',
       padding: '1rem',
+      fontSize: '0.75rem',
       border: '1px solid rgba(187, 134, 252, 0.2)',
     },
     childPanel: {
       background: 'rgba(3, 218, 198, 0.1)',
       borderRadius: '0.75rem',
       padding: '1rem',
+      fontSize: '0.75rem',
       border: '1px solid rgba(3, 218, 198, 0.2)',
     },
     panelTitle: {
@@ -188,6 +200,8 @@ export default function GamePage() {
       fontWeight: '600',
       marginBottom: '0.5rem',
       color: '#BB86FC',
+      letterSpacing: '0.02em',
+      fontFamily: spaceGrotesk.style.fontFamily,
     },
     panelText: {
       color: 'rgba(255, 255, 255, 0.8)',
@@ -232,6 +246,9 @@ export default function GamePage() {
     sceneDescription: {
       marginBottom: '1.5rem',
       lineHeight: '1.6',
+      fontSize: '1.2rem',
+      fontFamily: spaceGrotesk.style.fontFamily,
+      letterSpacing: '0.01em',
     },
     actionsGrid: {
       display: 'grid',
@@ -242,10 +259,13 @@ export default function GamePage() {
       background: 'rgba(255, 255, 255, 0.1)',
       borderRadius: '0.75rem',
       padding: '1rem',
+      fontSize: '1rem',
       textAlign: 'left',
       border: '1px solid rgba(255, 255, 255, 0.1)',
       cursor: 'pointer',
       transition: 'all 0.3s ease',
+      fontFamily: spaceGrotesk.style.fontFamily,
+      letterSpacing: '0.01em',
     },
     resultContainer: {
       background: 'rgba(3, 218, 198, 0.1)',
@@ -326,6 +346,52 @@ export default function GamePage() {
       background: 'rgba(207, 102, 121, 0.2)',
       color: '#CF6679',
       border: '1px solid rgba(207, 102, 121, 0.4)',
+    },
+    actionResult: {
+      background: 'rgba(3, 218, 198, 0.1)',
+      borderRadius: '0.75rem',
+      padding: '1.5rem',
+      marginBottom: '1.5rem',
+      border: '1px solid rgba(3, 218, 198, 0.2)',
+    },
+    resultTitle: {
+      fontSize: '1.25rem',
+      fontWeight: '600',
+      marginBottom: '0.5rem',
+      color: '#BB86FC',
+      letterSpacing: '0.02em',
+      fontFamily: spaceGrotesk.style.fontFamily,
+    },
+    resultDescription: {
+      marginBottom: '1.5rem',
+      lineHeight: '1.6',
+      fontSize: '1.2rem',
+      fontFamily: spaceGrotesk.style.fontFamily,
+      letterSpacing: '0.01em',
+    },
+    effectsContainer: {
+      marginBottom: '1.5rem',
+    },
+    effectsTitle: {
+      fontSize: '1.25rem',
+      fontWeight: '600',
+      marginBottom: '0.5rem',
+      color: '#BB86FC',
+      letterSpacing: '0.02em',
+      fontFamily: spaceGrotesk.style.fontFamily,
+    },
+    effectsList: {
+      listStyle: 'none',
+      padding: 0,
+    },
+    effectItem: {
+      marginBottom: '0.5rem',
+    },
+    effectName: {
+      fontWeight: '600',
+    },
+    effectValue: {
+      marginLeft: '0.5rem',
     },
   };
 
@@ -424,29 +490,54 @@ export default function GamePage() {
     }
   };
 
-  const rollD20 = () => {
-    return Math.floor(Math.random() * 20) + 1;
+  const rollDice = () => {
+    const newValue = Math.floor(Math.random() * 20) + 1;
+    return newValue;
   };
 
   const handleAction = async (action: Scene['actions'][0]) => {
     try {
+      // 检查是否需要特定属性
+      if (action.requiredAttribute && action.requiredAttribute !== 'none') {
+        const attributeValue = gameState.character.stats.attributes[action.requiredAttribute as keyof typeof gameState.character.stats.attributes];
+        if (attributeValue < 10) {
+          setError(`需要 ${action.requiredAttribute} 属性达到10点才能选择此选项。`);
+          return;
+        }
+      }
+
       setIsRolling(true);
-      setDiceRoll(null);
+      setDiceValue(null);
       
       const rollInterval = setInterval(() => {
-        setDiceRoll(rollD20());
+        setDiceValue(rollDice());
       }, 100);
 
       setTimeout(() => {
         clearInterval(rollInterval);
-        const finalRoll = rollD20();
-        setDiceRoll(finalRoll);
+        const finalRoll = rollDice();
+        setDiceValue(finalRoll);
         setIsRolling(false);
         
-        processActionResult(action, finalRoll);
+        // 根据骰子点数判断成功或失败 - 修改为适应20面骰子
+        // 在20面骰子中，1-10为失败，11-20为成功
+        const success = finalRoll >= 11; // 11点及以上算成功
+        const resultPrefix = success ? "Yes! " : "Oh no! ";
+        const result = resultPrefix + (success ? action.successText : action.failureText);
+        
+        setActionResult({
+          description: result,
+          effects: {
+            mood: success ? 5 : -5,
+            academicPerformance: success ? 5 : -5,
+            socialLife: success ? 5 : -5,
+            culturalConnection: success ? 5 : -5
+          }
+        });
       }, 1000);
     } catch (error) {
       console.error('Error handling action:', error);
+      setError('An error occurred while processing your action.');
       setIsRolling(false);
     }
   };
@@ -484,21 +575,26 @@ export default function GamePage() {
   };
 
   const handleNextScene = async () => {
-    setIsLoading(true);
-    setActionResult(null);
     try {
+      setIsLoading(true);
+      setActionResult(null);
+      // 重置骰子数值
+      setDiceValue(null);
+      setIsRolling(false);
+      
       const scene = await generateScene(gameState);
       setCurrentScene(scene);
     } catch (error) {
+      console.error('Error loading next scene:', error);
       setError('Failed to load the next scene. Please try again.');
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Helper function to calculate progress bar percentage
+  // Helper function to calculate progress bar
   const calculateProgressPercentage = (value: number) => {
-    // 直接使用数值作为百分比
+
     return Math.max(0, Math.min(100, value));
   };
 
@@ -748,37 +844,33 @@ export default function GamePage() {
             </div>
           </motion.div>
           
+          {/* Dice Roll Animation - 移动到场景描述下方 */}
+          {isRolling && <DiceRoll isRolling={isRolling} diceValue={diceValue} />}
+          
           {/* Character Info */}
           <motion.div variants={fadeIn('up', 'tween', 0.4, 1)} style={styles.infoPanel}>
             <div style={styles.characterPanel}>
               <h2 style={{ ...styles.panelTitle, color: '#BB86FC' }}>Character</h2>
               <p style={styles.panelText}>Style: {gameState.character.stats.parentingStyle}</p>
               <p style={styles.panelText}>Background: {gameState.character.stats.familyBackground}</p>
+              <div style={{ marginTop: '1rem', borderTop: '1px solid rgba(187, 134, 252, 0.2)', paddingTop: '0.75rem' }}>
+                <h3 style={{ fontSize: '0.9rem', fontWeight: '600', color: '#03DAC6', marginBottom: '0.5rem' }}>Child</h3>
+                <p style={styles.panelText}>Age: {gameState.child.age}</p>
+              </div>
             </div>
+            
+            {/* 属性值展示面板 */}
             <div style={styles.childPanel}>
-              <h2 style={{ ...styles.panelTitle, color: '#03DAC6' }}>Child</h2>
-              <p style={styles.panelText}>Age: {gameState.child.age}</p>
-            </div>
-          </motion.div>
-
-          {/* Stats Display */}
-          <motion.div 
-            variants={fadeIn('up', 'tween', 0.5, 1)} 
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(2, 1fr)',
-              gap: '1rem',
-              marginBottom: '1.5rem'
-            }}
-          >
-            <div style={styles.statContainer}>
-              <h3 style={{ ...styles.statTitle, color: '#FFC107' }}>Mood</h3>
-              <div style={styles.statFlexDisplay}>
-                <div style={{
-                  ...styles.statBarContainer,
-                  width: '85%',
-                  background: getProgressBarBackground(gameState.child.mood)
-                }}>
+              <h2 style={{ ...styles.panelTitle, color: '#03DAC6' }}>Attributes</h2>
+              
+              <div style={{ marginBottom: '0.75rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
+                  <span style={{ fontSize: '0.875rem', color: '#FFC107' }}>Mood</span>
+                  <span style={{ fontSize: '0.875rem', color: gameState.child.mood > 0 ? '#4CAF50' : gameState.child.mood < 0 ? '#F44336' : '#9E9E9E' }}>
+                    {gameState.child.mood}
+                  </span>
+                </div>
+                <div style={{ width: '100%', height: '0.5rem', background: 'rgba(255, 255, 255, 0.1)', borderRadius: '0.25rem', overflow: 'hidden' }}>
                   <div 
                     style={{
                       height: '100%',
@@ -789,17 +881,16 @@ export default function GamePage() {
                     }}
                   ></div>
                 </div>
-                <span style={{ 
-                  color: gameState.child.mood > 0 ? '#4CAF50' : gameState.child.mood < 0 ? '#F44336' : '#9E9E9E',
-                  marginLeft: '0.5rem',
-                  fontWeight: '500'
-                }}>{gameState.child.mood}</span>
               </div>
-            </div>
-            <div style={styles.statContainer}>
-              <h3 style={{ ...styles.statTitle, color: '#BB86FC' }}>Academic</h3>
-              <div style={styles.statFlexDisplay}>
-                <div style={{...styles.statBarContainer, width: '85%'}}>
+              
+              <div style={{ marginBottom: '0.75rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
+                  <span style={{ fontSize: '0.875rem', color: '#BB86FC' }}>Academic</span>
+                  <span style={{ fontSize: '0.875rem', color: '#BB86FC' }}>
+                    {gameState.child.academicPerformance}
+                  </span>
+                </div>
+                <div style={{ width: '100%', height: '0.5rem', background: 'rgba(255, 255, 255, 0.1)', borderRadius: '0.25rem', overflow: 'hidden' }}>
                   <div 
                     style={{
                       height: '100%',
@@ -809,13 +900,16 @@ export default function GamePage() {
                     }}
                   ></div>
                 </div>
-                <span style={{ color: '#BB86FC', marginLeft: '0.5rem' }}>{gameState.child.academicPerformance}</span>
               </div>
-            </div>
-            <div style={styles.statContainer}>
-              <h3 style={{ ...styles.statTitle, color: '#FF4081' }}>Social</h3>
-              <div style={styles.statFlexDisplay}>
-                <div style={{...styles.statBarContainer, width: '85%'}}>
+              
+              <div style={{ marginBottom: '0.75rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
+                  <span style={{ fontSize: '0.875rem', color: '#FF4081' }}>Social</span>
+                  <span style={{ fontSize: '0.875rem', color: '#FF4081' }}>
+                    {gameState.child.socialLife}
+                  </span>
+                </div>
+                <div style={{ width: '100%', height: '0.5rem', background: 'rgba(255, 255, 255, 0.1)', borderRadius: '0.25rem', overflow: 'hidden' }}>
                   <div 
                     style={{
                       height: '100%',
@@ -825,13 +919,16 @@ export default function GamePage() {
                     }}
                   ></div>
                 </div>
-                <span style={{ color: '#FF4081', marginLeft: '0.5rem' }}>{gameState.child.socialLife}</span>
               </div>
-            </div>
-            <div style={styles.statContainer}>
-              <h3 style={{ ...styles.statTitle, color: '#03DAC6' }}>Cultural</h3>
-              <div style={styles.statFlexDisplay}>
-                <div style={{...styles.statBarContainer, width: '85%'}}>
+              
+              <div style={{ marginBottom: '0.75rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
+                  <span style={{ fontSize: '0.875rem', color: '#03DAC6' }}>Cultural</span>
+                  <span style={{ fontSize: '0.875rem', color: '#03DAC6' }}>
+                    {gameState.child.culturalConnection}
+                  </span>
+                </div>
+                <div style={{ width: '100%', height: '0.5rem', background: 'rgba(255, 255, 255, 0.1)', borderRadius: '0.25rem', overflow: 'hidden' }}>
                   <div 
                     style={{
                       height: '100%',
@@ -841,7 +938,6 @@ export default function GamePage() {
                     }}
                   ></div>
                 </div>
-                <span style={{ color: '#03DAC6', marginLeft: '0.5rem' }}>{gameState.child.culturalConnection}</span>
               </div>
             </div>
           </motion.div>
@@ -865,6 +961,7 @@ export default function GamePage() {
             ) : (
               <>
                 <p style={styles.sceneDescription}>{currentScene?.description}</p>
+                <DiceRoll isRolling={isRolling} diceValue={diceValue} />
                 {!actionResult && (
                   <div style={styles.actionsGrid}>
                     {currentScene?.actions.map((action) => (
@@ -900,52 +997,54 @@ export default function GamePage() {
             )}
           </motion.div>
 
-          {/* Action Result Display */}
+          {/* Action Result */}
           {actionResult && (
-            <motion.div 
-              variants={fadeIn('up', 'tween', 0.7, 1)} 
-              style={styles.resultContainer}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              style={styles.actionResult}
             >
-              <p style={{ marginBottom: '1.5rem', lineHeight: '1.6' }}>{actionResult.description}</p>
-              <div style={styles.effectsGrid}>
-                <div style={{ ...styles.effectItem, borderColor: actionResult.effects.mood >= 0 ? 'rgba(255, 193, 7, 0.3)' : 'rgba(255, 193, 7, 0.2)', background: 'rgba(255, 193, 7, 0.1)' }}>
-                  <p style={{ color: '#FFC107' }}>Mood: {actionResult.effects.mood > 0 ? '+' : ''}{actionResult.effects.mood}</p>
-                </div>
-                <div style={{ ...styles.effectItem, borderColor: actionResult.effects.academicPerformance >= 0 ? 'rgba(187, 134, 252, 0.3)' : 'rgba(187, 134, 252, 0.2)', background: 'rgba(187, 134, 252, 0.1)' }}>
-                  <p style={{ color: '#BB86FC' }}>Academic: {actionResult.effects.academicPerformance > 0 ? '+' : ''}{actionResult.effects.academicPerformance}</p>
-                </div>
-                <div style={{ ...styles.effectItem, borderColor: actionResult.effects.socialLife >= 0 ? 'rgba(255, 64, 129, 0.3)' : 'rgba(255, 64, 129, 0.2)', background: 'rgba(255, 64, 129, 0.1)' }}>
-                  <p style={{ color: '#FF4081' }}>Social: {actionResult.effects.socialLife > 0 ? '+' : ''}{actionResult.effects.socialLife}</p>
-                </div>
-                <div style={{ ...styles.effectItem, borderColor: actionResult.effects.culturalConnection >= 0 ? 'rgba(3, 218, 198, 0.3)' : 'rgba(3, 218, 198, 0.2)', background: 'rgba(3, 218, 198, 0.1)' }}>
-                  <p style={{ color: '#03DAC6' }}>Cultural: {actionResult.effects.culturalConnection > 0 ? '+' : ''}{actionResult.effects.culturalConnection}</p>
-                </div>
+              <h3 style={styles.resultTitle}>Result</h3>
+              <p style={styles.resultDescription}>
+                {actionResult.description.startsWith("Yes!") ? (
+                  <>
+                    <span style={{ color: '#03DAC6', fontWeight: 'bold', fontSize: '1.2rem' }}>Yes! </span>
+                    {actionResult.description.substring(5)}
+                  </>
+                ) : actionResult.description.startsWith("Oh no!") ? (
+                  <>
+                    <span style={{ color: '#CF6679', fontWeight: 'bold', fontSize: '1.2rem' }}>Oh no! </span>
+                    {actionResult.description.substring(7)}
+                  </>
+                ) : (
+                  actionResult.description
+                )}
+              </p>
+              <div style={styles.effectsContainer}>
+                <h4 style={styles.effectsTitle}>Effects:</h4>
+                <ul style={styles.effectsList}>
+                  {Object.entries(actionResult.effects).map(([key, value]) => (
+                    <li key={key} style={styles.effectItem}>
+                      <span style={styles.effectName}>{key.replace(/([A-Z])/g, ' $1').trim()}:</span>
+                      <span style={{
+                        ...styles.effectValue,
+                        color: value > 0 ? '#03DAC6' : '#CF6679'
+                      }}>
+                        {value > 0 ? `+${value}` : value}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
               </div>
-              <motion.div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'center',
-                  marginTop: '1.5rem'
-                }}
+              <motion.button
+                onClick={handleNextScene}
+                style={styles.primaryButton}
+                whileHover={{ y: -2, boxShadow: '0 6px 15px rgba(187, 134, 252, 0.4)' }}
+                whileTap={{ scale: 0.98 }}
               >
-                <motion.button
-                  onClick={handleNextScene}
-                  style={{
-                    ...styles.continueButton,
-                    opacity: isLoading ? 0.7 : 1,
-                    cursor: isLoading ? 'not-allowed' : 'pointer',
-                  }}
-                  disabled={isLoading}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  {isLoading ? (
-                    <div style={styles.loadingSpinner} />
-                  ) : (
-                    'Continue to Next Scene'
-                  )}
-                </motion.button>
-              </motion.div>
+                Continue
+              </motion.button>
             </motion.div>
           )}
         </motion.div>

@@ -1,0 +1,147 @@
+/* 3D骰子样式 */
+.dice-container {
+  margin: auto auto;
+  position: relative;
+  width: 200px;
+  height: 200px;
+  perspective: 1500px;
+}
+
+.die {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 0.5s ease-out;
+  cursor: pointer;
+  transform: rotateX(-53deg);
+}
+
+.die.rolling {
+  animation: roll 3s linear;
+}
+
+@keyframes roll {
+  10% { transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg) }
+  30% { transform: rotateX(120deg) rotateY(240deg) rotateZ(0deg) translateX(40px) translateY(40px) }
+  50% { transform: rotateX(240deg) rotateY(480deg) rotateZ(0deg) translateX(-40px) translateY(-40px) }
+  70% { transform: rotateX(360deg) rotateY(720deg) rotateZ(0deg) }
+  90% { transform: rotateX(480deg) rotateY(960deg) rotateZ(0deg) }
+}
+
+.face {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  margin: 0 -50px;
+  border-left: 50px solid transparent;
+  border-right: 50px solid transparent;
+  border-bottom: 86px solid rgba(187, 134, 252, 0.75);
+  width: 0px;
+  height: 0px;
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+}
+
+.face:before {
+  content: attr(data-value);
+  position: absolute;
+  top: 21.5px;
+  left: -100px;
+  color: #fff;
+  text-shadow: 1px 1px 3px #000;
+  font-size: 43px;
+  text-align: center;
+  line-height: 77.4px;
+  width: 200px;
+  height: 86px;
+}
+
+/* 面1-5 */
+.face:nth-child(1) { transform: rotateY(0deg) translateZ(33.5px) translateY(-12.9px) rotateX(53deg); }
+.face:nth-child(2) { transform: rotateY(-72deg) translateZ(33.5px) translateY(-12.9px) rotateX(53deg); }
+.face:nth-child(3) { transform: rotateY(-144deg) translateZ(33.5px) translateY(-12.9px) rotateX(53deg); }
+.face:nth-child(4) { transform: rotateY(-216deg) translateZ(33.5px) translateY(-12.9px) rotateX(53deg); }
+.face:nth-child(5) { transform: rotateY(-288deg) translateZ(33.5px) translateY(-12.9px) rotateX(53deg); }
+
+/* 面16-20 */
+.face:nth-child(16) { transform: rotateY(36deg) translateZ(33.5px) translateY(67.08px) rotateZ(180deg) rotateX(53deg); }
+.face:nth-child(17) { transform: rotateY(108deg) translateZ(33.5px) translateY(67.08px) rotateZ(180deg) rotateX(53deg); }
+.face:nth-child(18) { transform: rotateY(180deg) translateZ(33.5px) translateY(67.08px) rotateZ(180deg) rotateX(53deg); }
+.face:nth-child(19) { transform: rotateY(252deg) translateZ(33.5px) translateY(67.08px) rotateZ(180deg) rotateX(53deg); }
+.face:nth-child(20) { transform: rotateY(324deg) translateZ(33.5px) translateY(67.08px) rotateZ(180deg) rotateX(53deg); }
+
+/* 面6-10 */
+.face:nth-child(6) { transform: rotateY(0deg) translateZ(75px) translateY(55.08px) rotateZ(180deg) rotateX(-11deg); }
+.face:nth-child(7) { transform: rotateY(-72deg) translateZ(75px) translateY(55.08px) rotateZ(180deg) rotateX(-11deg); }
+.face:nth-child(8) { transform: rotateY(-144deg) translateZ(75px) translateY(55.08px) rotateZ(180deg) rotateX(-11deg); }
+.face:nth-child(9) { transform: rotateY(-216deg) translateZ(75px) translateY(55.08px) rotateZ(180deg) rotateX(-11deg); }
+.face:nth-child(10) { transform: rotateY(-288deg) translateZ(75px) translateY(55.08px) rotateZ(180deg) rotateX(-11deg); }
+
+/* 面11-15 */
+.face:nth-child(11) { transform: rotateY(36deg) translateZ(75px) translateY(55.08px) rotateX(-11deg); }
+.face:nth-child(12) { transform: rotateY(108deg) translateZ(75px) translateY(55.08px) rotateX(-11deg); }
+.face:nth-child(13) { transform: rotateY(180deg) translateZ(75px) translateY(55.08px) rotateX(-11deg); }
+.face:nth-child(14) { transform: rotateY(252deg) translateZ(75px) translateY(55.08px) rotateX(-11deg); }
+.face:nth-child(15) { transform: rotateY(324deg) translateZ(75px) translateY(55.08px) rotateX(-11deg); }
+
+/* 骰子提示框样式 */
+.dice-tooltip {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 280px;
+  background: rgba(30, 30, 30, 0.9);
+  border-radius: 8px;
+  padding: 12px;
+  color: white;
+  font-size: 0.9rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  z-index: 100;
+  margin-bottom: 10px;
+  border: 1px solid rgba(187, 134, 252, 0.3);
+  text-align: center;
+}
+
+.dice-tooltip h3 {
+  margin: 0 0 8px 0;
+  color: #BB86FC;
+}
+
+.dice-tooltip p {
+  margin: 0 0 8px 0;
+}
+
+.dice-tooltip .highlight {
+  margin: 12px 0;
+  padding: 8px;
+  border-radius: 6px;
+  background: rgba(187, 134, 252, 0.1);
+  border: 1px solid rgba(187, 134, 252, 0.3);
+}
+
+.dice-tooltip .result-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.dice-tooltip .result-indicator {
+  font-weight: bold;
+  margin-right: 8px;
+  font-size: 1.1rem;
+}
+
+.dice-tooltip .success {
+  color: #03DAC6;
+}
+
+.dice-tooltip .failure {
+  color: #CF6679;
+}
+
+.dice-tooltip .result-text {
+  font-size: 1.1rem;
+  font-weight: bold;
+} 

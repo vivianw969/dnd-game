@@ -3,6 +3,14 @@ export interface GameState {
     stats: {
       parentingStyle: string;
       familyBackground: string;
+      attributes: {
+        academicPressure: number;
+        tigerDiscipline: number;
+        socialEngineering: number;
+        familyHonor: number;
+        resourceManagement: number;
+        emotionalTactics: number;
+      };
     };
   };
   child: {
