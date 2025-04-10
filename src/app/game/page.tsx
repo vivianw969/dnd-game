@@ -34,20 +34,32 @@ interface ActionResult {
 export default function GamePage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [gameState, setGameState] = useState<GameState>({
-    character: {
-      stats: {
-        parentingStyle: searchParams.get('parentingStyle') || 'authoritative',
-        familyBackground: searchParams.get('familyBackground') || 'middle-class',
+  const [gameState, setGameState] = useState<GameState>(() => {
+    const initialAttributes = {
+      academicPressure: getInitialAttributeValue(searchParams.get('parentingStyle'), 'academicPressure'),
+      tigerDiscipline: getInitialAttributeValue(searchParams.get('parentingStyle'), 'tigerDiscipline'),
+      socialEngineering: getInitialAttributeValue(searchParams.get('parentingStyle'), 'socialEngineering'),
+      familyHonor: getInitialAttributeValue(searchParams.get('parentingStyle'), 'familyHonor'),
+      resourceManagement: getInitialAttributeValue(searchParams.get('parentingStyle'), 'resourceManagement'),
+      emotionalTactics: getInitialAttributeValue(searchParams.get('parentingStyle'), 'emotionalTactics'),
+    };
+
+    return {
+      character: {
+        stats: {
+          parentingStyle: searchParams.get('parentingStyle') || 'authoritative',
+          familyBackground: searchParams.get('familyBackground') || 'middle-class',
+          attributes: initialAttributes
+        },
       },
-    },
-    child: {
-      age: 8,
-      mood: 0,
-      academicPerformance: 0,
-      socialLife: 0,
-      culturalConnection: 0,
-    },
+      child: {
+        age: 8,
+        mood: getInitialChildValue('mood', initialAttributes),
+        academicPerformance: getInitialChildValue('academicPerformance', initialAttributes),
+        socialLife: getInitialChildValue('socialLife', initialAttributes),
+        culturalConnection: getInitialChildValue('culturalConnection', initialAttributes),
+      },
+    };
   });
   const [currentScene, setCurrentScene] = useState<Scene | null>(null);
   const [actionResult, setActionResult] = useState<ActionResult | null>(null);
@@ -509,6 +521,115 @@ export default function GamePage() {
     }
     return 'rgba(158, 158, 158, 0.1)';
   };
+
+  // Helper function to get initial attribute values based on parenting style
+  function getInitialAttributeValue(parentingStyle: string | null, attribute: string): number {
+    const baseValue = 10;
+    const styleBonus = {
+      'authoritative': {
+        academicPressure: 2,
+        tigerDiscipline: 1,
+        socialEngineering: 2,
+        familyHonor: 1,
+        resourceManagement: 2,
+        emotionalTactics: 2,
+      },
+      'authoritarian': {
+        academicPressure: 3,
+        tigerDiscipline: 3,
+        socialEngineering: 1,
+        familyHonor: 2,
+        resourceManagement: 1,
+        emotionalTactics: 0,
+      },
+      'permissive': {
+        academicPressure: 0,
+        tigerDiscipline: 0,
+        socialEngineering: 2,
+        familyHonor: 1,
+        resourceManagement: 1,
+        emotionalTactics: 3,
+      },
+      'uninvolved': {
+        academicPressure: 0,
+        tigerDiscipline: 0,
+        socialEngineering: 0,
+        familyHonor: 0,
+        resourceManagement: 0,
+        emotionalTactics: 0,
+      },
+    } as const;
+
+    const backgroundBonus = {
+      'middle-class': {
+        academicPressure: 1,
+        tigerDiscipline: 1,
+        socialEngineering: 1,
+        familyHonor: 1,
+        resourceManagement: 1,
+        emotionalTactics: 1,
+      },
+      'working-class': {
+        academicPressure: 1,
+        tigerDiscipline: 2,
+        socialEngineering: 0,
+        familyHonor: 2,
+        resourceManagement: 1,
+        emotionalTactics: 1,
+      },
+      'upper-class': {
+        academicPressure: 2,
+        tigerDiscipline: 1,
+        socialEngineering: 2,
+        familyHonor: 1,
+        resourceManagement: 2,
+        emotionalTactics: 1,
+      },
+      'immigrant': {
+        academicPressure: 2,
+        tigerDiscipline: 2,
+        socialEngineering: 0,
+        familyHonor: 3,
+        resourceManagement: 1,
+        emotionalTactics: 1,
+      },
+    } as const;
+
+    const selectedStyle = parentingStyle || 'authoritative';
+    const selectedBackground = searchParams.get('familyBackground') || 'middle-class';
+
+    return baseValue + 
+           (styleBonus[selectedStyle as keyof typeof styleBonus]?.[attribute as keyof typeof styleBonus.authoritative] || 0) +
+           (backgroundBonus[selectedBackground as keyof typeof backgroundBonus]?.[attribute as keyof typeof backgroundBonus['middle-class']] || 0);
+  }
+
+  // Helper function to get initial child values based on character attributes
+  function getInitialChildValue(stat: string, attributes: GameState['character']['stats']['attributes']): number {
+    switch (stat) {
+      case 'mood':
+        // Mood is affected by emotionalTactics and tigerDiscipline (inverse)
+        return Math.max(0, Math.min(100, 
+          (attributes.emotionalTactics - 10) * 2 - (attributes.tigerDiscipline - 10)
+        ));
+      case 'academicPerformance':
+        // Academic performance is affected by academicPressure and resourceManagement
+        return Math.max(0, Math.min(100, 
+          (attributes.academicPressure - 10) * 3 + (attributes.resourceManagement - 10)
+        ));
+      case 'socialLife':
+        // Social life is affected by socialEngineering and emotionalTactics
+        return Math.max(0, Math.min(100, 
+          (attributes.socialEngineering - 10) * 2 + (attributes.emotionalTactics - 10)
+        ));
+      case 'culturalConnection':
+        // Cultural connection is affected by familyHonor and socialEngineering
+        return Math.max(0, Math.min(100, 
+          (attributes.familyHonor - 10) * 2 + (attributes.socialEngineering - 10)
+        ));
+      default:
+        return 0;
+    }
+  }
 
   if (error) {
     return (
