@@ -1,0 +1,11 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+
+# Your rule content
+
+- You can @ files here
+- You can use markdown but dont have to
+When I ask you to change the UI, don't make any change to the current structure of code or the logic. Just change UI, css file, etc.

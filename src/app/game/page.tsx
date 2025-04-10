@@ -2,10 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { motion } from 'framer-motion';
 import { generateScene, generateActionResult } from '@/utils/openai/client';
 import { saveGame, loadGame, getCurrentUser, signOut } from '@/utils/supabase/client';
 import { GameState } from '@/types/game';
 import { supabase } from '@/utils/supabase/client';
+import { fadeIn, staggerContainer } from '@/utils/motion';
 
 interface Scene {
   description: string;
@@ -55,6 +57,265 @@ export default function GamePage() {
   const [error, setError] = useState<string | null>(null);
   const [user, setUser] = useState<any>(null);
   const [saveStatus, setSaveStatus] = useState<{ type: 'success' | 'error' | null; message: string }>({ type: null, message: '' });
+
+  // Styling from first page
+  const styles = {
+    container: {
+      minHeight: '100vh',
+      overflow: 'hidden',
+      background: 'linear-gradient(135deg, #121212 0%, #2D1F3D 50%, #1E1E1E 100%)',
+      color: '#ffffff',
+      fontFamily: 'Roboto, "Segoe UI", Arial, sans-serif',
+      position: 'relative',
+      padding: '2rem 1rem',
+    },
+    backgroundElements: {
+      position: 'fixed',
+      inset: 0,
+      zIndex: 0,
+    },
+    purpleGlow: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      width: '33%',
+      height: '66%',
+      background: 'rgba(186, 104, 200, 0.1)',
+      borderRadius: '50%',
+      filter: 'blur(120px)',
+    },
+    tealGlow: {
+      position: 'absolute',
+      bottom: 0,
+      right: 0,
+      width: '50%',
+      height: '50%',
+      background: 'rgba(0, 176, 155, 0.1)',
+      borderRadius: '50%',
+      filter: 'blur(120px)',
+    },
+    content: {
+      maxWidth: '1000px',
+      margin: '0 auto',
+      position: 'relative',
+      zIndex: 10,
+    },
+    card: {
+      background: 'rgba(30, 30, 30, 0.7)',
+      backdropFilter: 'blur(10px)',
+      borderRadius: '1rem',
+      boxShadow: '0 15px 40px rgba(0, 0, 0, 0.3)',
+      padding: '2rem',
+      border: '1px solid rgba(255, 255, 255, 0.05)',
+    },
+    header: {
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: '1.5rem',
+    },
+    title: {
+      fontSize: '1.75rem',
+      fontWeight: 'bold',
+      color: '#BB86FC',
+      letterSpacing: '-0.025em',
+    },
+    buttonContainer: {
+      display: 'flex',
+      gap: '1rem',
+    },
+    primaryButton: {
+      background: 'linear-gradient(135deg, #8E24AA 0%, #BB86FC 100%)',
+      color: 'white',
+      padding: '0.75rem 1rem',
+      borderRadius: '0.5rem',
+      border: 'none',
+      cursor: 'pointer',
+      transition: 'all 0.3s ease',
+      boxShadow: '0 4px 10px rgba(187, 134, 252, 0.3)',
+    },
+    secondaryButton: {
+      background: 'linear-gradient(135deg, #00897B 0%, #03DAC6 100%)',
+      color: 'white',
+      padding: '0.75rem 1rem',
+      borderRadius: '0.5rem',
+      border: 'none',
+      cursor: 'pointer',
+      transition: 'all 0.3s ease',
+      boxShadow: '0 4px 10px rgba(3, 218, 198, 0.3)',
+    },
+    dangerButton: {
+      background: '#CF6679',
+      color: 'white',
+      padding: '0.75rem 1rem',
+      borderRadius: '0.5rem',
+      border: 'none',
+      cursor: 'pointer',
+      transition: 'all 0.3s ease',
+    },
+    infoPanel: {
+      display: 'grid',
+      gridTemplateColumns: '1fr 1fr',
+      gap: '1rem',
+      marginBottom: '1.5rem',
+    },
+    characterPanel: {
+      background: 'rgba(187, 134, 252, 0.1)',
+      borderRadius: '0.75rem',
+      padding: '1rem',
+      border: '1px solid rgba(187, 134, 252, 0.2)',
+    },
+    childPanel: {
+      background: 'rgba(3, 218, 198, 0.1)',
+      borderRadius: '0.75rem',
+      padding: '1rem',
+      border: '1px solid rgba(3, 218, 198, 0.2)',
+    },
+    panelTitle: {
+      fontSize: '1.25rem',
+      fontWeight: '600',
+      marginBottom: '0.5rem',
+      color: '#BB86FC',
+    },
+    panelText: {
+      color: 'rgba(255, 255, 255, 0.8)',
+    },
+    statsGrid: {
+      display: 'grid',
+      gridTemplateColumns: 'repeat(2, 1fr)',
+      gap: '1rem',
+      marginBottom: '1.5rem',
+    },
+    statContainer: {
+      background: 'rgba(30, 30, 30, 0.5)',
+      borderRadius: '0.75rem',
+      padding: '1rem',
+      border: '1px solid rgba(255, 255, 255, 0.05)',
+    },
+    statTitle: {
+      fontSize: '0.875rem',
+      fontWeight: '600',
+      marginBottom: '0.5rem',
+    },
+    statBarContainer: {
+      width: '100%',
+      height: '0.5rem',
+      background: 'rgba(255, 255, 255, 0.1)',
+      borderRadius: '0.25rem',
+      overflow: 'hidden',
+      marginBottom: '0.25rem',
+    },
+    statFlexDisplay: {
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    },
+    sceneContainer: {
+      background: 'rgba(255, 255, 255, 0.05)',
+      borderRadius: '0.75rem',
+      padding: '1.5rem',
+      marginBottom: '1.5rem',
+      border: '1px solid rgba(255, 255, 255, 0.1)',
+    },
+    sceneDescription: {
+      marginBottom: '1.5rem',
+      lineHeight: '1.6',
+    },
+    actionsGrid: {
+      display: 'grid',
+      gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+      gap: '1rem',
+    },
+    actionButton: {
+      background: 'rgba(255, 255, 255, 0.1)',
+      borderRadius: '0.75rem',
+      padding: '1rem',
+      textAlign: 'left',
+      border: '1px solid rgba(255, 255, 255, 0.1)',
+      cursor: 'pointer',
+      transition: 'all 0.3s ease',
+    },
+    resultContainer: {
+      background: 'rgba(3, 218, 198, 0.1)',
+      borderRadius: '0.75rem',
+      padding: '1.5rem',
+      marginBottom: '1.5rem',
+      border: '1px solid rgba(3, 218, 198, 0.2)',
+    },
+    effectsGrid: {
+      display: 'grid',
+      gridTemplateColumns: 'repeat(4, 1fr)',
+      gap: '0.75rem',
+      marginBottom: '1.5rem',
+    },
+    effectItem: {
+      background: 'rgba(255, 255, 255, 0.05)',
+      borderRadius: '0.5rem',
+      padding: '0.75rem',
+      textAlign: 'center',
+      border: '1px solid rgba(255, 255, 255, 0.1)',
+    },
+    buttonShine: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      width: '100%',
+      height: '100%',
+      background: 'linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent)',
+      transform: 'translateX(-100%)',
+    },
+    loadingSpinner: {
+      width: '2rem',
+      height: '2rem',
+      borderRadius: '50%',
+      border: '2px solid rgba(187, 134, 252, 0.3)',
+      borderTopColor: '#BB86FC',
+      animation: 'spin 1s linear infinite',
+    },
+    continueButton: {
+      background: 'linear-gradient(135deg, #8E24AA 0%, #BB86FC 100%)', 
+      color: 'white',
+      padding: '0.75rem 1.5rem',
+      borderRadius: '0.5rem',
+      border: 'none',
+      cursor: 'pointer',
+      transition: 'all 0.3s ease',
+      display: 'block',
+      margin: '0 auto',
+      boxShadow: '0 4px 10px rgba(187, 134, 252, 0.3)',
+    },
+    errorContainer: {
+      background: 'rgba(207, 102, 121, 0.1)',
+      borderRadius: '0.75rem',
+      padding: '1.5rem',
+      border: '1px solid rgba(207, 102, 121, 0.3)',
+      textAlign: 'center',
+    },
+    errorMessage: {
+      color: '#CF6679',
+      marginBottom: '1rem',
+    },
+    statusMessage: {
+      position: 'absolute',
+      top: '100%',
+      left: 0,
+      marginTop: '0.5rem',
+      padding: '0.5rem 0.75rem',
+      borderRadius: '0.25rem',
+      fontSize: '0.875rem',
+      zIndex: 20,
+    },
+    successMessage: {
+      background: 'rgba(3, 218, 198, 0.2)',
+      color: '#03DAC6',
+      border: '1px solid rgba(3, 218, 198, 0.4)',
+    },
+    errorStatusMessage: {
+      background: 'rgba(207, 102, 121, 0.2)',
+      color: '#CF6679',
+      border: '1px solid rgba(207, 102, 121, 0.4)',
+    },
+  };
 
   useEffect(() => {
     checkAuth();
@@ -111,7 +372,6 @@ export default function GamePage() {
       setIsLoading(true);
       await saveGame(gameState);
       setSaveStatus({ type: 'success', message: 'Game saved successfully!' });
-      // 3秒后清除提示
       setTimeout(() => {
         setSaveStatus({ type: null, message: '' });
       }, 3000);
@@ -161,19 +421,16 @@ export default function GamePage() {
       setIsRolling(true);
       setDiceRoll(null);
       
-      // Roll the dice with animation
       const rollInterval = setInterval(() => {
         setDiceRoll(rollD20());
       }, 100);
 
-      // Stop rolling after 1 second
       setTimeout(() => {
         clearInterval(rollInterval);
         const finalRoll = rollD20();
         setDiceRoll(finalRoll);
         setIsRolling(false);
         
-        // Process the action result
         processActionResult(action, finalRoll);
       }, 1000);
     } catch (error) {
@@ -190,7 +447,6 @@ export default function GamePage() {
       console.log('Received action result:', result);
       setActionResult(result);
       
-      // Update game state with new values
       setGameState(prev => ({
         ...prev,
         child: {
@@ -228,200 +484,352 @@ export default function GamePage() {
     }
   };
 
+  // Helper function to calculate progress bar percentage
+  const calculateProgressPercentage = (value: number) => {
+    // 直接使用数值作为百分比
+    return Math.max(0, Math.min(100, value));
+  };
+
+  // Helper function to get progress bar color
+  const getProgressBarColor = (value: number) => {
+    if (value > 50) {
+      return 'linear-gradient(90deg, #4CAF50, #8BC34A)';
+    } else if (value > 0) {
+      return 'linear-gradient(90deg, #FFC107, #FFEB3B)';
+    }
+    return 'linear-gradient(90deg, #9E9E9E, #BDBDBD)';
+  };
+
+  // Helper function to get progress bar background
+  const getProgressBarBackground = (value: number) => {
+    if (value > 50) {
+      return 'rgba(76, 175, 80, 0.1)';
+    } else if (value > 0) {
+      return 'rgba(255, 193, 7, 0.1)';
+    }
+    return 'rgba(158, 158, 158, 0.1)';
+  };
+
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-100 p-6">
-        <div className="max-w-4xl mx-auto">
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
-            <strong className="font-bold">Error!</strong>
-            <span className="block sm:inline"> {error}</span>
-            <button
-              onClick={loadInitialScene}
-              className="mt-2 bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
-            >
-              Try Again
-            </button>
-          </div>
+      <div style={styles.container}>
+        <div style={styles.backgroundElements}>
+          <div style={styles.purpleGlow}></div>
+          <div style={styles.tealGlow}></div>
         </div>
+        <motion.div
+          variants={staggerContainer()}
+          initial="hidden"
+          animate="show"
+          style={styles.content}
+        >
+          <motion.div variants={fadeIn('up', 'tween', 0.2, 1)} style={styles.card}>
+            <div style={styles.errorContainer}>
+              <p style={styles.errorMessage}>{error}</p>
+              <button
+                onClick={loadInitialScene}
+                style={styles.primaryButton}
+              >
+                Try Again
+              </button>
+            </div>
+          </motion.div>
+        </motion.div>
       </div>
     );
   }
 
   if (isLoading && !currentScene) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      <div style={{
+        ...styles.container,
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center'
+      }}>
+        <div style={styles.backgroundElements}>
+          <div style={styles.purpleGlow}></div>
+          <div style={styles.tealGlow}></div>
+        </div>
+        <div style={styles.loadingSpinner}></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-blue-100 p-4">
-      <div className="max-w-4xl mx-auto">
-        <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
-          <div className="flex justify-between items-center mb-6">
-            <h1 className="text-2xl font-bold text-gray-800">Parenting Adventure</h1>
-            <div className="flex gap-4">
-              <div className="relative">
-                <button
+    <div style={styles.container}>
+      <div style={styles.backgroundElements}>
+        <div style={styles.purpleGlow}></div>
+        <div style={styles.tealGlow}></div>
+      </div>
+      
+      <motion.div
+        variants={staggerContainer()}
+        initial="hidden"
+        animate="show"
+        style={styles.content}
+      >
+        <motion.div variants={fadeIn('up', 'tween', 0.2, 1)} style={styles.card}>
+          {/* Header */}
+          <motion.div variants={fadeIn('up', 'tween', 0.3, 1)} style={styles.header}>
+            <h1 style={styles.title}>Parenting Adventure</h1>
+            <div style={styles.buttonContainer}>
+              <div style={{ position: 'relative' }}>
+                <motion.button
                   onClick={handleSaveGame}
                   disabled={isLoading}
-                  className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 disabled:opacity-50"
+                  style={{
+                    ...styles.primaryButton,
+                    opacity: isLoading ? 0.7 : 1,
+                    position: 'relative',
+                    overflow: 'hidden'
+                  }}
+                  whileHover={!isLoading ? { y: -2, boxShadow: '0 6px 15px rgba(187, 134, 252, 0.4)' } : {}}
+                  whileTap={!isLoading ? { scale: 0.98 } : {}}
                 >
                   Save Game
-                </button>
+                  <motion.div
+                    style={styles.buttonShine}
+                    animate={{ 
+                      x: ['100%', '200%'],
+                      transition: { repeat: Infinity, duration: 3, ease: 'linear' }
+                    }}
+                  />
+                </motion.button>
                 {saveStatus.type && (
-                  <div className={`absolute top-full left-0 mt-2 p-2 rounded ${
-                    saveStatus.type === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                  }`}>
+                  <div style={{
+                    ...styles.statusMessage,
+                    ...(saveStatus.type === 'success' ? styles.successMessage : styles.errorStatusMessage)
+                  }}>
                     {saveStatus.message}
                   </div>
                 )}
               </div>
-              <button
+              <motion.button
                 onClick={handleSignOut}
-                className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+                style={{
+                  ...styles.dangerButton,
+                  position: 'relative',
+                  overflow: 'hidden'
+                }}
+                whileHover={{ y: -2, boxShadow: '0 6px 15px rgba(207, 102, 121, 0.4)' }}
+                whileTap={{ scale: 0.98 }}
               >
                 Sign Out
-              </button>
+                <motion.div
+                  style={styles.buttonShine}
+                  animate={{ 
+                    x: ['100%', '200%'],
+                    transition: { repeat: Infinity, duration: 3, ease: 'linear', delay: 1.5 }
+                  }}
+                />
+              </motion.button>
             </div>
-          </div>
+          </motion.div>
           
           {/* Character Info */}
-          <div className="grid grid-cols-2 gap-4 mb-6">
-            <div className="bg-blue-50 p-4 rounded-lg">
-              <h2 className="text-lg font-semibold text-blue-800 mb-2">Character</h2>
-              <p className="text-gray-700">Style: {gameState.character.stats.parentingStyle}</p>
-              <p className="text-gray-700">Background: {gameState.character.stats.familyBackground}</p>
+          <motion.div variants={fadeIn('up', 'tween', 0.4, 1)} style={styles.infoPanel}>
+            <div style={styles.characterPanel}>
+              <h2 style={{ ...styles.panelTitle, color: '#BB86FC' }}>Character</h2>
+              <p style={styles.panelText}>Style: {gameState.character.stats.parentingStyle}</p>
+              <p style={styles.panelText}>Background: {gameState.character.stats.familyBackground}</p>
             </div>
-            <div className="bg-green-50 p-4 rounded-lg">
-              <h2 className="text-lg font-semibold text-green-800 mb-2">Child</h2>
-              <p className="text-gray-700">Age: {gameState.child.age}</p>
+            <div style={styles.childPanel}>
+              <h2 style={{ ...styles.panelTitle, color: '#03DAC6' }}>Child</h2>
+              <p style={styles.panelText}>Age: {gameState.child.age}</p>
             </div>
-          </div>
+          </motion.div>
 
           {/* Stats Display */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-            <div className="bg-yellow-50 p-4 rounded-lg">
-              <h3 className="text-sm font-semibold text-yellow-800 mb-1">Mood</h3>
-              <div className="flex items-center">
-                <div className="w-full bg-yellow-200 rounded-full h-2.5">
+          <motion.div 
+            variants={fadeIn('up', 'tween', 0.5, 1)} 
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(2, 1fr)',
+              gap: '1rem',
+              marginBottom: '1.5rem'
+            }}
+          >
+            <div style={styles.statContainer}>
+              <h3 style={{ ...styles.statTitle, color: '#FFC107' }}>Mood</h3>
+              <div style={styles.statFlexDisplay}>
+                <div style={{
+                  ...styles.statBarContainer,
+                  width: '85%',
+                  background: getProgressBarBackground(gameState.child.mood)
+                }}>
                   <div 
-                    className="bg-yellow-500 h-2.5 rounded-full" 
-                    style={{ width: `${((gameState.child.mood + 100) / 200) * 100}%` }}
+                    style={{
+                      height: '100%',
+                      width: `${calculateProgressPercentage(gameState.child.mood)}%`,
+                      background: getProgressBarColor(gameState.child.mood),
+                      borderRadius: '0.25rem',
+                      transition: 'width 0.3s ease, background 0.3s ease'
+                    }}
                   ></div>
                 </div>
-                <span className="ml-2 text-sm font-medium text-yellow-800">{gameState.child.mood}</span>
+                <span style={{ 
+                  color: gameState.child.mood > 0 ? '#4CAF50' : gameState.child.mood < 0 ? '#F44336' : '#9E9E9E',
+                  marginLeft: '0.5rem',
+                  fontWeight: '500'
+                }}>{gameState.child.mood}</span>
               </div>
             </div>
-            <div className="bg-purple-50 p-4 rounded-lg">
-              <h3 className="text-sm font-semibold text-purple-800 mb-1">Academic</h3>
-              <div className="flex items-center">
-                <div className="w-full bg-purple-200 rounded-full h-2.5">
+            <div style={styles.statContainer}>
+              <h3 style={{ ...styles.statTitle, color: '#BB86FC' }}>Academic</h3>
+              <div style={styles.statFlexDisplay}>
+                <div style={{...styles.statBarContainer, width: '85%'}}>
                   <div 
-                    className="bg-purple-500 h-2.5 rounded-full" 
-                    style={{ width: `${((gameState.child.academicPerformance + 100) / 200) * 100}%` }}
+                    style={{
+                      height: '100%',
+                      width: `${calculateProgressPercentage(gameState.child.academicPerformance)}%`,
+                      background: 'linear-gradient(90deg, #9C27B0, #BB86FC)',
+                      borderRadius: '0.25rem'
+                    }}
                   ></div>
                 </div>
-                <span className="ml-2 text-sm font-medium text-purple-800">{gameState.child.academicPerformance}</span>
+                <span style={{ color: '#BB86FC', marginLeft: '0.5rem' }}>{gameState.child.academicPerformance}</span>
               </div>
             </div>
-            <div className="bg-pink-50 p-4 rounded-lg">
-              <h3 className="text-sm font-semibold text-pink-800 mb-1">Social</h3>
-              <div className="flex items-center">
-                <div className="w-full bg-pink-200 rounded-full h-2.5">
+            <div style={styles.statContainer}>
+              <h3 style={{ ...styles.statTitle, color: '#FF4081' }}>Social</h3>
+              <div style={styles.statFlexDisplay}>
+                <div style={{...styles.statBarContainer, width: '85%'}}>
                   <div 
-                    className="bg-pink-500 h-2.5 rounded-full" 
-                    style={{ width: `${((gameState.child.socialLife + 100) / 200) * 100}%` }}
+                    style={{
+                      height: '100%',
+                      width: `${calculateProgressPercentage(gameState.child.socialLife)}%`,
+                      background: 'linear-gradient(90deg, #FF4081, #FF80AB)',
+                      borderRadius: '0.25rem'
+                    }}
                   ></div>
                 </div>
-                <span className="ml-2 text-sm font-medium text-pink-800">{gameState.child.socialLife}</span>
+                <span style={{ color: '#FF4081', marginLeft: '0.5rem' }}>{gameState.child.socialLife}</span>
               </div>
             </div>
-            <div className="bg-indigo-50 p-4 rounded-lg">
-              <h3 className="text-sm font-semibold text-indigo-800 mb-1">Cultural</h3>
-              <div className="flex items-center">
-                <div className="w-full bg-indigo-200 rounded-full h-2.5">
+            <div style={styles.statContainer}>
+              <h3 style={{ ...styles.statTitle, color: '#03DAC6' }}>Cultural</h3>
+              <div style={styles.statFlexDisplay}>
+                <div style={{...styles.statBarContainer, width: '85%'}}>
                   <div 
-                    className="bg-indigo-500 h-2.5 rounded-full" 
-                    style={{ width: `${((gameState.child.culturalConnection + 100) / 200) * 100}%` }}
+                    style={{
+                      height: '100%',
+                      width: `${calculateProgressPercentage(gameState.child.culturalConnection)}%`,
+                      background: 'linear-gradient(90deg, #00BCD4, #03DAC6)',
+                      borderRadius: '0.25rem'
+                    }}
                   ></div>
                 </div>
-                <span className="ml-2 text-sm font-medium text-indigo-800">{gameState.child.culturalConnection}</span>
+                <span style={{ color: '#03DAC6', marginLeft: '0.5rem' }}>{gameState.child.culturalConnection}</span>
               </div>
             </div>
-          </div>
+          </motion.div>
 
           {/* Scene Display */}
-          <div className="bg-gray-50 p-6 rounded-lg mb-6">
+          <motion.div variants={fadeIn('up', 'tween', 0.6, 1)} style={styles.sceneContainer}>
             {isLoading ? (
-              <div className="flex justify-center items-center h-32">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+              <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '120px' }}>
+                <div style={styles.loadingSpinner}></div>
               </div>
             ) : error ? (
-              <div className="text-center">
-                <p className="text-red-500 mb-4">{error}</p>
+              <div style={{ textAlign: 'center' }}>
+                <p style={{ color: '#CF6679', marginBottom: '1rem' }}>{error}</p>
                 <button
                   onClick={loadInitialScene}
-                  className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                  style={styles.primaryButton}
                 >
                   Retry
                 </button>
               </div>
             ) : (
               <>
-                <p className="text-gray-700 mb-4">{currentScene?.description}</p>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {currentScene?.actions.map((action) => (
-                    <button
-                      key={action.id}
-                      onClick={() => handleAction(action)}
-                      disabled={isLoading}
-                      className="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow text-left"
-                    >
-                      <p className="font-medium text-gray-800">{action.description}</p>
-                      {action.requiredAttribute && (
-                        <p className="text-sm text-gray-500 mt-1">
-                          Requires: {action.requiredAttribute}
+                <p style={styles.sceneDescription}>{currentScene?.description}</p>
+                {!actionResult && (
+                  <div style={styles.actionsGrid}>
+                    {currentScene?.actions.map((action) => (
+                      <motion.button
+                        key={action.id}
+                        onClick={() => handleAction(action)}
+                        disabled={isLoading}
+                        style={styles.actionButton}
+                        whileHover={{
+                          y: -3,
+                          boxShadow: '0 10px 20px rgba(0, 0, 0, 0.2)',
+                          background: 'rgba(255, 255, 255, 0.15)'
+                        }}
+                        whileTap={{ scale: 0.98 }}
+                      >
+                        <p style={{ 
+                          fontWeight: '500', 
+                          color: '#ffffff',
+                          marginBottom: action.requiredAttribute ? '0.5rem' : 0
+                        }}>
+                          {action.description}
                         </p>
-                      )}
-                    </button>
-                  ))}
-                </div>
+                        {action.requiredAttribute && (
+                          <p style={{ fontSize: '0.875rem', color: 'rgba(255, 255, 255, 0.6)' }}>
+                            Requires: {action.requiredAttribute}
+                          </p>
+                        )}
+                      </motion.button>
+                    ))}
+                  </div>
+                )}
               </>
             )}
-          </div>
+          </motion.div>
 
           {/* Action Result Display */}
           {actionResult && (
-            <div className="bg-green-50 p-6 rounded-lg mb-6">
-              <p className="text-gray-700 mb-4">{actionResult.description}</p>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="bg-yellow-50 p-3 rounded-lg">
-                  <p className="text-sm text-yellow-800">Mood: {actionResult.effects.mood > 0 ? '+' : ''}{actionResult.effects.mood}</p>
+            <motion.div 
+              variants={fadeIn('up', 'tween', 0.7, 1)} 
+              style={styles.resultContainer}
+            >
+              <p style={{ marginBottom: '1.5rem', lineHeight: '1.6' }}>{actionResult.description}</p>
+              <div style={styles.effectsGrid}>
+                <div style={{ ...styles.effectItem, borderColor: actionResult.effects.mood >= 0 ? 'rgba(255, 193, 7, 0.3)' : 'rgba(255, 193, 7, 0.2)', background: 'rgba(255, 193, 7, 0.1)' }}>
+                  <p style={{ color: '#FFC107' }}>Mood: {actionResult.effects.mood > 0 ? '+' : ''}{actionResult.effects.mood}</p>
                 </div>
-                <div className="bg-purple-50 p-3 rounded-lg">
-                  <p className="text-sm text-purple-800">Academic: {actionResult.effects.academicPerformance > 0 ? '+' : ''}{actionResult.effects.academicPerformance}</p>
+                <div style={{ ...styles.effectItem, borderColor: actionResult.effects.academicPerformance >= 0 ? 'rgba(187, 134, 252, 0.3)' : 'rgba(187, 134, 252, 0.2)', background: 'rgba(187, 134, 252, 0.1)' }}>
+                  <p style={{ color: '#BB86FC' }}>Academic: {actionResult.effects.academicPerformance > 0 ? '+' : ''}{actionResult.effects.academicPerformance}</p>
                 </div>
-                <div className="bg-pink-50 p-3 rounded-lg">
-                  <p className="text-sm text-pink-800">Social: {actionResult.effects.socialLife > 0 ? '+' : ''}{actionResult.effects.socialLife}</p>
+                <div style={{ ...styles.effectItem, borderColor: actionResult.effects.socialLife >= 0 ? 'rgba(255, 64, 129, 0.3)' : 'rgba(255, 64, 129, 0.2)', background: 'rgba(255, 64, 129, 0.1)' }}>
+                  <p style={{ color: '#FF4081' }}>Social: {actionResult.effects.socialLife > 0 ? '+' : ''}{actionResult.effects.socialLife}</p>
                 </div>
-                <div className="bg-indigo-50 p-3 rounded-lg">
-                  <p className="text-sm text-indigo-800">Cultural: {actionResult.effects.culturalConnection > 0 ? '+' : ''}{actionResult.effects.culturalConnection}</p>
+                <div style={{ ...styles.effectItem, borderColor: actionResult.effects.culturalConnection >= 0 ? 'rgba(3, 218, 198, 0.3)' : 'rgba(3, 218, 198, 0.2)', background: 'rgba(3, 218, 198, 0.1)' }}>
+                  <p style={{ color: '#03DAC6' }}>Cultural: {actionResult.effects.culturalConnection > 0 ? '+' : ''}{actionResult.effects.culturalConnection}</p>
                 </div>
               </div>
-              <div className="mt-4 flex justify-center">
-                <button
+              <motion.div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  marginTop: '1.5rem'
+                }}
+              >
+                <motion.button
                   onClick={handleNextScene}
-                  className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600"
+                  style={{
+                    ...styles.continueButton,
+                    opacity: isLoading ? 0.7 : 1,
+                    cursor: isLoading ? 'not-allowed' : 'pointer',
+                  }}
+                  disabled={isLoading}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                 >
-                  Continue
-                </button>
-              </div>
-            </div>
+                  {isLoading ? (
+                    <div style={styles.loadingSpinner} />
+                  ) : (
+                    'Continue to Next Scene'
+                  )}
+                </motion.button>
+              </motion.div>
+            </motion.div>
           )}
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
     </div>
   );
-} 
+}
+
