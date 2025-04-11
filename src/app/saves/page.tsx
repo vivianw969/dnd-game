@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { getGameSaves, GameSave } from '@/utils/supabase/client';
+import { getGameSaves, GameSave, getCurrentUser, deleteGameSave } from '@/utils/supabase/client';
 import { motion } from 'framer-motion';
-import { fadeIn } from '@/utils/motion';
+import { fadeIn, staggerContainer } from '@/utils/motion';
 
 const styles = {
   container: {
@@ -100,15 +100,31 @@ const styles = {
 
 export default function SavesPage() {
   const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [saves, setSaves] = useState<GameSave[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    loadSaves();
-  }, []);
+    const checkAuth = async () => {
+      try {
+        const user = await getCurrentUser();
+        if (!user) {
+          router.push('/login');
+          return;
+        }
+        setIsAuthenticated(true);
+        loadSaves(user.id);
+      } catch (error) {
+        console.error('Error checking authentication:', error);
+        router.push('/login');
+      }
+    };
 
-  const loadSaves = async () => {
+    checkAuth();
+  }, [router]);
+
+  const loadSaves = async (userId: string) => {
     try {
       setIsLoading(true);
       const gameSaves = await getGameSaves();
@@ -126,7 +142,29 @@ export default function SavesPage() {
   };
 
   const handleLoadSave = (saveId: string) => {
-    router.push(`/game?load=true&saveId=${saveId}`);
+    if (!isAuthenticated) {
+      router.push('/login');
+      return;
+    }
+    setIsLoading(true);
+    router.push(`/game?saveId=${saveId}`);
+  };
+
+  const handleDeleteSave = async (saveId: string) => {
+    if (!isAuthenticated) {
+      router.push('/login');
+      return;
+    }
+    try {
+      setIsLoading(true);
+      await deleteGameSave(saveId);
+      setSaves(saves.filter(save => save.id !== saveId));
+    } catch (error) {
+      setError('Failed to delete save. Please try again.');
+      console.error('Error deleting save:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const getInitialStats = (save: GameSave) => {
@@ -159,7 +197,7 @@ export default function SavesPage() {
           <div style={{ textAlign: 'center', color: '#CF6679' }}>
             <p style={{ marginBottom: '1rem' }}>{error}</p>
             <button
-              onClick={loadSaves}
+              onClick={() => loadSaves('')}
               style={styles.loadButton}
             >
               Retry
@@ -197,14 +235,27 @@ export default function SavesPage() {
                         Last updated: {formatDate(save.updated_at)}
                       </p>
                     </div>
-                    <motion.button
-                      onClick={() => handleLoadSave(save.id)}
-                      style={styles.loadButton}
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                    >
-                      Load Game
-                    </motion.button>
+                    <div style={{ display: 'flex', gap: '1rem' }}>
+                      <motion.button
+                        onClick={() => handleLoadSave(save.id)}
+                        style={styles.loadButton}
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                      >
+                        Load Game
+                      </motion.button>
+                      <motion.button
+                        onClick={() => handleDeleteSave(save.id)}
+                        style={{
+                          ...styles.loadButton,
+                          background: 'linear-gradient(90deg, #CF6679, #FF4081)'
+                        }}
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                      >
+                        Delete
+                      </motion.button>
+                    </div>
                   </div>
                   <div style={styles.statsGrid}>
                     <div style={styles.statItem}>

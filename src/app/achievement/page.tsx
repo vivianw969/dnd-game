@@ -167,55 +167,45 @@ const AchievementPage: FC = () => {
             variants={fadeIn('up', 'tween', 0.5, 1)}
             style={styles.achievementsList}
           >
-            {Object.values(ACHIEVEMENTS)
-              .sort((a, b) => {
-                const aUnlocked = unlockedAchievements.some(ua => ua.id === a.id);
-                const bUnlocked = unlockedAchievements.some(ua => ua.id === b.id);
-                // 已解锁的排在前面
-                if (aUnlocked && !bUnlocked) return -1;
-                if (!aUnlocked && bUnlocked) return 1;
-                // 如果解锁状态相同，保持原有顺序
-                return 0;
-              })
-              .map((achievement, index) => {
-                const isUnlocked = unlockedAchievements.some(a => a.id === achievement.id);
-                return (
-                  <motion.div
-                    key={achievement.id}
-                    variants={fadeIn('up', 'tween', 0.6 + index * 0.1, 1)}
+            {Object.values(ACHIEVEMENTS).map((achievement, index) => {
+              const isUnlocked = unlockedAchievements.some(a => a.id === achievement.id);
+              return (
+                <motion.div
+                  key={achievement.id}
+                  variants={fadeIn('up', 'tween', 0.6 + index * 0.1, 1)}
+                  style={{
+                    ...styles.achievementCard,
+                    opacity: isUnlocked ? 1 : 0.5,
+                    filter: isUnlocked ? 'none' : 'grayscale(1)',
+                  }}
+                  whileHover={isUnlocked ? { 
+                    scale: 1.02,
+                    boxShadow: '0 8px 20px rgba(0, 0, 0, 0.2)',
+                  } : {}}
+                >
+                  <div 
                     style={{
-                      ...styles.achievementCard,
-                      opacity: isUnlocked ? 1 : 0.5,
-                      filter: isUnlocked ? 'none' : 'grayscale(1)',
+                      ...styles.achievementIcon,
+                      background: `${achievement.color}20`,
+                      color: achievement.color,
                     }}
-                    whileHover={isUnlocked ? { 
-                      scale: 1.02,
-                      boxShadow: '0 8px 20px rgba(0, 0, 0, 0.2)',
-                    } : {}}
                   >
-                    <div 
-                      style={{
-                        ...styles.achievementIcon,
-                        background: `${achievement.color}20`,
-                        color: achievement.color,
-                      }}
-                    >
-                      {achievement.icon}
-                    </div>
-                    <div style={styles.achievementInfo}>
-                      <h3 style={{
-                        ...styles.achievementTitle,
-                        color: achievement.color,
-                      }}>
-                        {achievement.title}
-                      </h3>
-                      <p style={styles.achievementDescription}>
-                        {achievement.description}
-                      </p>
-                    </div>
-                  </motion.div>
-                );
-              })}
+                    {achievement.icon}
+                  </div>
+                  <div style={styles.achievementInfo}>
+                    <h3 style={{
+                      ...styles.achievementTitle,
+                      color: achievement.color,
+                    }}>
+                      {achievement.title}
+                    </h3>
+                    <p style={styles.achievementDescription}>
+                      {achievement.description}
+                    </p>
+                  </div>
+                </motion.div>
+              );
+            })}
           </motion.div>
 
           <motion.button

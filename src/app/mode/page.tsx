@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { getCurrentUser } from '@/utils/supabase/client';
@@ -12,18 +12,49 @@ import { fadeIn, staggerContainer } from '@/utils/motion';
 export default function GameModePage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const user = await getCurrentUser();
+        if (!user) {
+          router.push('/login');
+        } else {
+          setIsAuthenticated(true);
+        }
+      } catch (error) {
+        console.error('Error checking authentication:', error);
+        router.push('/login');
+      }
+    };
+
+    checkAuth();
+  }, [router]);
 
   const handleStartNewGame = () => {
+    if (!isAuthenticated) {
+      router.push('/login');
+      return;
+    }
     setIsLoading(true);
     router.push('/character');
   };
 
   const handleLoadGame = () => {
+    if (!isAuthenticated) {
+      router.push('/login');
+      return;
+    }
     setIsLoading(true);
     router.push('/saves');
   };
 
   const handleAchievement = () => {
+    if (!isAuthenticated) {
+      router.push('/login');
+      return;
+    }
     setIsLoading(true);
     router.push('/achievement');
   };

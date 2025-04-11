@@ -45,6 +45,7 @@ interface ActionResult {
 export default function GamePage() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [gameState, setGameState] = useState<GameState>(() => {
     // Only initialize if we have parentingStyle in URL params (indicating new game)
     if (!searchParams.get('parentingStyle')) {
@@ -184,7 +185,7 @@ export default function GamePage() {
     primaryButton: {
       background: 'linear-gradient(135deg, #8E24AA 0%, #BB86FC 100%)',
       color: 'white',
-      padding: '0.5rem 0.75rem',
+      padding: '0.75rem 1rem',
       borderRadius: '0.5rem',
       border: 'none',
       cursor: 'pointer',
@@ -202,13 +203,14 @@ export default function GamePage() {
       boxShadow: '0 4px 10px rgba(3, 218, 198, 0.3)',
     },
     dangerButton: {
-      background: '#CF6679',
+      background: 'linear-gradient(135deg, #CF6679 0%, #FF4081 100%)',
       color: 'white',
       padding: '0.75rem 1rem',
       borderRadius: '0.5rem',
       border: 'none',
       cursor: 'pointer',
       transition: 'all 0.3s ease',
+      boxShadow: '0 4px 10px rgba(207, 102, 121, 0.3)',
     },
     infoPanel: {
       display: 'flex',
@@ -428,54 +430,33 @@ export default function GamePage() {
   };
 
   useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const user = await getCurrentUser();
+        if (!user) {
+          router.push('/login');
+          return;
+        }
+        setIsAuthenticated(true);
+        setUser(user);
+
+        // Load saved game if saveId is present
+        if (searchParams.get('saveId')) {
+          await loadSavedGame();
+        } else if (searchParams.get('parentingStyle')) {
+          // Initialize new game with user's choices
+          await loadInitialScene();
+        } else {
+          router.push('/mode');
+        }
+      } catch (error) {
+        console.error('Error checking authentication:', error);
+        router.push('/login');
+      }
+    };
+
     checkAuth();
-  }, []);
-
-  useEffect(() => {
-    if (user) {
-      const shouldLoadGame = searchParams.get('load') === 'true';
-      if (shouldLoadGame) {
-        loadSavedGame();
-      } else {
-          loadInitialScene();
-      }
-    }
-  }, [user]);
-
-  const checkAuth = async () => {
-    try {
-      const currentUser = await getCurrentUser();
-      setUser(currentUser);
-    } catch (error) {
-      router.push('/login');
-    }
-  };
-
-  const loadSavedGame = async () => {
-    try {
-      const saveId = searchParams.get('saveId');
-      if (!saveId) {
-        router.push('/saves');
-        return;
-      }
-
-      const { data: save, error } = await supabase
-        .from('game_saves')
-        .select('*')
-        .eq('id', saveId)
-        .single();
-
-      if (error || !save) {
-        throw new Error('Save not found');
-      }
-
-      setGameState(save.game_state);
-      loadInitialScene();
-    } catch (error) {
-      console.error('Error loading saved game:', error);
-      router.push('/saves');
-    }
-  };
+  }, [router, searchParams]);
 
   const handleSaveGame = async () => {
     try {
@@ -726,12 +707,15 @@ export default function GamePage() {
       },
     } as const;
 
+    // Ensure we have valid values
     const selectedStyle = parentingStyle || 'authoritative';
     const selectedBackground = searchParams.get('familyBackground') || 'middle-class';
 
-    return baseValue + 
-           (styleBonus[selectedStyle as keyof typeof styleBonus]?.[attribute as keyof typeof styleBonus.authoritative] || 0) +
-           (backgroundBonus[selectedBackground as keyof typeof backgroundBonus]?.[attribute as keyof typeof backgroundBonus['middle-class']] || 0);
+    // Calculate the total value
+    const styleValue = styleBonus[selectedStyle as keyof typeof styleBonus]?.[attribute as keyof typeof styleBonus.authoritative] || 0;
+    const backgroundValue = backgroundBonus[selectedBackground as keyof typeof backgroundBonus]?.[attribute as keyof typeof backgroundBonus['middle-class']] || 0;
+
+    return baseValue + styleValue + backgroundValue;
   }
 
   // Helper function to get initial child values based on character attributes
@@ -761,6 +745,32 @@ export default function GamePage() {
         return 0;
     }
   }
+
+  const loadSavedGame = async () => {
+    try {
+      const saveId = searchParams.get('saveId');
+      if (!saveId) {
+        router.push('/saves');
+        return;
+      }
+
+      const { data: save, error } = await supabase
+        .from('game_saves')
+        .select('*')
+        .eq('id', saveId)
+        .single();
+
+      if (error || !save) {
+        throw new Error('Save not found');
+      }
+
+      setGameState(save.game_state);
+      await loadInitialScene();
+    } catch (error) {
+      console.error('Error loading saved game:', error);
+      router.push('/saves');
+    }
+  };
 
   if (error) {
     return (

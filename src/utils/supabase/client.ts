@@ -89,6 +89,17 @@ export async function getGameSaves() {
 
   if (error) throw error;
   return data as GameSave[];
-} 
+}
+
+export const deleteGameSave = async (saveId: string): Promise<void> => {
+  const { error } = await supabase
+    .from('game_saves')
+    .delete()
+    .eq('id', saveId);
+
+  if (error) {
+    throw error;
+  }
+};
 
 export type { GameSave };
