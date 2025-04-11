@@ -5,6 +5,7 @@ import { motion, MotionStyle } from 'framer-motion';
 import { fadeIn, slideIn, staggerContainer, textVariant } from '../utils/motion';
 import { CSSProperties, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 
 interface StatBarProps {
   label: string;
@@ -83,6 +84,49 @@ const DiceRoll = ({ isRolling, diceValue }: DiceRollProps) => (
     {isRolling && <p className="mt-2 text-gray-600">Rolling...</p>}
   </div>
 );
+
+// Add floating icons component
+const FloatingIcons = () => {
+  const icons = ['🎮', '🎲', '📚', '🌟', '🎯', '🎨'];
+  return (
+    <div style={{ position: 'absolute', width: '100%', height: '100%', overflow: 'hidden', pointerEvents: 'none' }}>
+      {icons.map((icon, index) => (
+        <motion.div
+          key={index}
+          initial={{ 
+            x: Math.random() * window.innerWidth,
+            y: -50,
+            opacity: 0,
+            scale: 0.8 + Math.random() * 0.4
+          }}
+          animate={{
+            y: window.innerHeight + 50,
+            x: [
+              Math.random() * window.innerWidth,
+              Math.random() * window.innerWidth,
+              Math.random() * window.innerWidth
+            ],
+            opacity: [0, 1, 1, 0],
+            rotate: [0, 360]
+          }}
+          transition={{
+            duration: 8 + Math.random() * 7,
+            repeat: Infinity,
+            delay: Math.random() * 5,
+            ease: "easeInOut"
+          }}
+          style={{
+            position: 'absolute',
+            fontSize: '2rem',
+            zIndex: 1
+          }}
+        >
+          {icon}
+        </motion.div>
+      ))}
+    </div>
+  );
+};
 
 // Navigation component
 const Navigation = () => {
@@ -168,6 +212,16 @@ export default function Home() {
       color: '#ffffff',
       fontFamily: 'Roboto, "Segoe UI", Arial, sans-serif',
       position: 'relative' as const,
+    } as CSSProperties,
+    backgroundImage: {
+      position: 'absolute' as const,
+      top: 0,
+      left: 0,
+      width: '100%',
+      height: '100%',
+      objectFit: 'cover' as const,
+      opacity: 0.25,
+      zIndex: 0,
     } as CSSProperties,
     backgroundElements: {
       position: 'fixed' as const,
@@ -320,6 +374,18 @@ export default function Home() {
 
   return (
     <div style={styles.container}>
+      {/* Background Image */}
+      <Image
+        src="/planet-04.png"
+        alt="Background"
+        layout="fill"
+        objectFit="cover"
+        style={styles.backgroundImage}
+      />
+      
+      {/* Floating Icons */}
+      <FloatingIcons />
+
       {/* Background Elements */}
       <div style={styles.backgroundElements}>
         <div style={styles.purpleGlow}></div>
@@ -342,7 +408,7 @@ export default function Home() {
               variants={textVariant(1.1)} 
               style={styles.mainTitle}
             >
-              AI Parenting
+              AI Adventure
             </motion.h1>
             <motion.h2
               variants={textVariant(1.2)}
@@ -366,7 +432,7 @@ export default function Home() {
             variants={fadeIn('up', 'tween', 0.2, 1)}
             style={styles.description}
           >
-            Experience the challenges and joys of parenting in a unique AI-powered simulation game
+            Experience unique adventures in an AI-powered simulation game
           </motion.p>
 
           {/* Get Started Button */}
@@ -424,7 +490,7 @@ export default function Home() {
               {
                 icon: '📚',
                 title: 'Educational',
-                description: 'Learn about different parenting styles',
+                description: 'Learn through immersive storytelling',
                 color: '#CF6679',
                 bgColor: 'rgba(207, 102, 121, 0.03)'
               },
@@ -441,7 +507,9 @@ export default function Home() {
               >
                 <div style={styles.featureIcon}>{feature.icon}</div>
                 <h3 style={{...styles.featureTitle, color: feature.color}}>{feature.title}</h3>
-                <p style={styles.featureDescription}>{feature.description}</p>
+                <p className="text-lg text-gray-600 mt-2">
+                  {feature.description}
+                </p>
               </motion.div>
             ))}
           </motion.div>

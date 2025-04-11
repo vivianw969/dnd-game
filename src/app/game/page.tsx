@@ -52,7 +52,7 @@ export default function GamePage() {
       resourceManagement: getInitialAttributeValue(searchParams.get('parentingStyle'), 'resourceManagement'),
       emotionalTactics: getInitialAttributeValue(searchParams.get('parentingStyle'), 'emotionalTactics'),
     };
-
+    
     return {
       character: {
         stats: {
@@ -405,7 +405,7 @@ export default function GamePage() {
       if (shouldLoadGame) {
         loadSavedGame();
       } else {
-        loadInitialScene();
+          loadInitialScene();
       }
     }
   }, [user]);
@@ -741,15 +741,15 @@ export default function GamePage() {
           style={styles.content}
         >
           <motion.div variants={fadeIn('up', 'tween', 0.2, 1)} style={styles.card}>
-            <div style={styles.errorContainer}>
-              <p style={styles.errorMessage}>{error}</p>
-              <button
-                onClick={loadInitialScene}
-                style={styles.primaryButton}
-              >
-                Try Again
-              </button>
-            </div>
+          <div style={styles.errorContainer}>
+            <p style={styles.errorMessage}>{error}</p>
+            <button
+              onClick={loadInitialScene}
+              style={styles.primaryButton}
+            >
+              Try Again
+            </button>
+          </div>
           </motion.div>
         </motion.div>
       </div>
@@ -779,7 +779,7 @@ export default function GamePage() {
         <div style={styles.purpleGlow}></div>
         <div style={styles.tealGlow}></div>
       </div>
-      
+
       <motion.div
         variants={staggerContainer()}
         initial="hidden"
@@ -819,9 +819,9 @@ export default function GamePage() {
                     ...(saveStatus.type === 'success' ? styles.successMessage : styles.errorStatusMessage)
                   }}>
                     {saveStatus.message}
-                  </div>
+            </div>
                 )}
-              </div>
+          </div>
               <motion.button
                 onClick={handleSignOut}
                 style={{
@@ -833,7 +833,7 @@ export default function GamePage() {
                 whileTap={{ scale: 0.98 }}
               >
                 Sign Out
-                <motion.div
+            <motion.div
                   style={styles.buttonShine}
                   animate={{ 
                     x: ['100%', '200%'],
@@ -842,11 +842,11 @@ export default function GamePage() {
                 />
               </motion.button>
             </div>
-          </motion.div>
-          
+            </motion.div>
+
           {/* Dice Roll Animation - 移动到场景描述下方 */}
           {isRolling && <DiceRoll isRolling={isRolling} diceValue={diceValue} />}
-          
+
           {/* Character Info */}
           <motion.div variants={fadeIn('up', 'tween', 0.4, 1)} style={styles.infoPanel}>
             <div style={styles.characterPanel}>
@@ -965,10 +965,10 @@ export default function GamePage() {
                 {!actionResult && (
                   <div style={styles.actionsGrid}>
                     {currentScene?.actions.map((action) => (
-                      <motion.button
-                        key={action.id}
+                  <motion.button
+                    key={action.id}
                         onClick={() => handleAction(action)}
-                        disabled={isLoading}
+                    disabled={isLoading}
                         style={styles.actionButton}
                         whileHover={{
                           y: -3,
@@ -988,10 +988,10 @@ export default function GamePage() {
                           <p style={{ fontSize: '0.875rem', color: 'rgba(255, 255, 255, 0.6)' }}>
                             Requires: {action.requiredAttribute}
                           </p>
-                        )}
-                      </motion.button>
-                    ))}
-                  </div>
+                    )}
+                  </motion.button>
+                ))}
+              </div>
                 )}
               </>
             )}

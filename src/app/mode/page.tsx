@@ -23,6 +23,11 @@ export default function GameModePage() {
     router.push('/saves');
   };
 
+  const handleAchievement = () => {
+    setIsLoading(true);
+    router.push('/achievement');
+  };
+
   // Define standard CSS styles
   const styles = {
     container: {
@@ -31,16 +36,16 @@ export default function GameModePage() {
       background: 'linear-gradient(135deg, #121212 0%, #2D1F3D 50%, #1E1E1E 100%)',
       color: '#ffffff',
       fontFamily: 'Roboto, "Segoe UI", Arial, sans-serif',
-      position: 'relative',
+      position: 'relative' as const,
       padding: '2rem 1rem',
     },
     backgroundElements: {
-      position: 'fixed',
+      position: 'fixed' as const,
       inset: 0,
       zIndex: 0,
     },
     purpleGlow: {
-      position: 'absolute',
+      position: 'absolute' as const,
       top: 0,
       left: 0,
       width: '33%',
@@ -50,7 +55,7 @@ export default function GameModePage() {
       filter: 'blur(120px)',
     },
     tealGlow: {
-      position: 'absolute',
+      position: 'absolute' as const,
       bottom: 0,
       right: 0,
       width: '50%',
@@ -62,7 +67,7 @@ export default function GameModePage() {
     content: {
       maxWidth: '900px',
       margin: '0 auto',
-      position: 'relative',
+      position: 'relative' as const,
       zIndex: 10,
     },
     card: {
@@ -72,7 +77,7 @@ export default function GameModePage() {
       boxShadow: '0 15px 40px rgba(0, 0, 0, 0.3)',
       padding: '2.5rem',
       border: '1px solid rgba(255, 255, 255, 0.05)',
-      textAlign: 'center',
+      textAlign: 'center' as const,
     },
     title: {
       fontSize: '2.5rem',
@@ -90,9 +95,9 @@ export default function GameModePage() {
     },
     buttonsGrid: {
       display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+      gridTemplateColumns: 'repeat(3, 1fr)',
       gap: '1.5rem',
-      maxWidth: '700px',
+      maxWidth: '900px',
       margin: '0 auto',
     },
     buttonBase: {
@@ -103,9 +108,9 @@ export default function GameModePage() {
       cursor: 'pointer',
       transition: 'all 0.3s ease',
       display: 'flex',
-      flexDirection: 'column',
+      flexDirection: 'column' as const,
       alignItems: 'center',
-      position: 'relative',
+      position: 'relative' as const,
       overflow: 'hidden',
     },
     newGameButton: {
@@ -115,6 +120,10 @@ export default function GameModePage() {
     loadGameButton: {
       background: 'linear-gradient(135deg, #00897B 0%, #03DAC6 100%)',
       boxShadow: '0 10px 30px rgba(3, 218, 198, 0.3)',
+    },
+    achievementButton: {
+      background: 'linear-gradient(135deg, #FFB300 0%, #FFD54F 100%)',
+      boxShadow: '0 10px 30px rgba(255, 213, 79, 0.3)',
     },
     buttonTitle: {
       fontSize: '1.5rem',
@@ -129,7 +138,7 @@ export default function GameModePage() {
       cursor: 'not-allowed',
     },
     buttonShine: {
-      position: 'absolute',
+      position: 'absolute' as const,
       top: 0,
       left: 0,
       width: '100%',
@@ -188,7 +197,7 @@ export default function GameModePage() {
               whileTap={!isLoading ? { scale: 0.98 } : {}}
             >
               <h2 style={styles.buttonTitle}>Start New Game</h2>
-              <p style={styles.buttonDescription}>Begin a new parenting journey</p>
+              <p style={styles.buttonDescription}>Begin a new adventure</p>
               
               {/* Shine effect */}
               <motion.div
@@ -215,7 +224,7 @@ export default function GameModePage() {
               whileTap={!isLoading ? { scale: 0.98 } : {}}
             >
               <h2 style={styles.buttonTitle}>Load Game</h2>
-              <p style={styles.buttonDescription}>Continue your previous adventure</p>
+              <p style={styles.buttonDescription}>Continue your previous journey</p>
               
               {/* Shine effect */}
               <motion.div
@@ -223,6 +232,33 @@ export default function GameModePage() {
                 animate={{ 
                   x: ['100%', '200%'],
                   transition: { repeat: Infinity, duration: 3, ease: 'linear', delay: 1.5 }
+                }}
+              />
+            </motion.button>
+
+            <motion.button
+              onClick={handleAchievement}
+              disabled={isLoading}
+              style={{
+                ...styles.buttonBase,
+                ...styles.achievementButton,
+                ...(isLoading ? styles.buttonDisabled : {})
+              }}
+              whileHover={!isLoading ? { 
+                y: -5, 
+                boxShadow: '0 15px 30px rgba(255, 213, 79, 0.4)'
+              } : {}}
+              whileTap={!isLoading ? { scale: 0.98 } : {}}
+            >
+              <h2 style={styles.buttonTitle}>Achievement</h2>
+              <p style={styles.buttonDescription}>View your achievements</p>
+              
+              {/* Shine effect */}
+              <motion.div
+                style={styles.buttonShine}
+                animate={{ 
+                  x: ['100%', '200%'],
+                  transition: { repeat: Infinity, duration: 3, ease: 'linear', delay: 3 }
                 }}
               />
             </motion.button>

@@ -1,0 +1,81 @@
+
+{
+  "Dnd-Scenario": "White House Chaos: Trump's Advisor",
+  "attributes": {
+    "Spin": "Ability to manipulate information, craft alternative narratives, and control public perception during scandals and controversies.",
+    "Patience": "Mental fortitude to endure presidential tantrums, 3AM tweet storms, and absurd demands without having a nervous breakdown.",
+    "Cunning": "Political savvy to navigate Washington power games, outsmart rivals, and implement your agenda while no one's looking.",
+    "Flattery": "Skill at ego management, delivering perfectly-timed compliments, and maintaining favor with the narcissist-in-chief.",
+    "Crisis Management": "Talent for handling emergencies, from nuclear threats to covfefe tweets, often simultaneously and with minimal preparation.",
+    "Media Savvy": "Understanding of press dynamics, social media algorithms, and how to turn 'fake news' accusations to your advantage."
+  },
+  "baseSkills": {
+    "Alternative Facts": {"attribute": "Spin", "description": "Create believable falsehoods or reshape reality to serve the administration's narrative and distract from actual problems."},
+    "Damage Control": {"attribute": "Spin", "description": "Minimize fallout from presidential gaffes, scandals, or 3AM tweets that threatened nuclear war or crashed the stock market."},
+    "Tantrum Management": {"attribute": "Patience", "description": "Calm presidential rage episodes by offering Diet Coke, compliments, or a new enemy to focus on."},
+    "Sleep Deprivation": {"attribute": "Patience", "description": "Function effectively despite being awakened at all hours for urgent matters like bad TV coverage or burger cravings."},
+    "Bureaucratic Maneuvering": {"attribute": "Cunning", "description": "Navigate complex White House power dynamics and ensure your rivals get blamed for failures while you claim credit for successes."},
+    "Leak Prevention": {"attribute": "Cunning", "description": "Keep embarrassing information from reaching the press or identify which colleague to frame when leaks inevitably happen."},
+    "Ego Massage": {"attribute": "Flattery", "description": "Provide validation and praise to maintain presidential confidence and secure your position in the inner circle."},
+    "Loyalty Signaling": {"attribute": "Flattery", "description": "Demonstrate unwavering support publicly, even when defending policies that contradict statements from 10 minutes ago."},
+    "Distraction Creation": {"attribute": "Crisis Management", "description": "Generate new outrageous headlines to divert attention from ongoing scandals, investigations, or policy failures."},
+    "Nuclear De-escalation": {"attribute": "Crisis Management", "description": "Talk the president down from extreme military options by appealing to ratings, legacy concerns, or golf schedule conflicts."},
+    "Twitter Translation": {"attribute": "Media Savvy", "description": "Interpret and explain presidential social media outbursts to confused allies, enemies, and markets without revealing your own confusion."},
+    "Press Wrangling": {"attribute": "Media Savvy", "description": "Manage hostile reporters, dodge questions, and turn briefings into propaganda opportunities regardless of the day's chaos."}
+  },
+  "startingPoint": "Your first day in the chaotic White House. The President just fired your predecessor via tweet while you were being security-screened. He's already called you by three different names and asked if you can 'do something about those tariff people.' Intelligence briefings are piling up unread, and CNN is reporting a possible missile test in North Korea. The President wants McDonald's for lunch and someone to explain why his approval rating isn't 100%.",
+  "playerCustomizations": {
+    "role": {
+      "description": "Choose your role in the Trump administration",
+      "content": {
+        "Chief of Staff": {
+          "description": "The organizational mastermind attempting to create order from chaos. You control the President's schedule, access to information, and which advisors he talks to (in theory).",
+          "attributeBonus": {"Crisis Management": 2, "Patience": 1}
+        },
+        "Press Secretary": {
+          "description": "The public face tasked with defending the indefensible with a straight face. Your daily briefings explaining presidential tweets are performance art that would impress Broadway.",
+          "attributeBonus": {"Spin": 2, "Media Savvy": 1}
+        },
+        "National Security Advisor": {
+          "description": "The strategy expert responsible for keeping America safe despite the Commander-in-Chief's tendency to make policy via Fox & Friends. You hide the nuclear football when necessary.",
+          "attributeBonus": {"Crisis Management": 2, "Cunning": 1}
+        },
+        "Family Member/Advisor": {
+          "description": "Related by blood or marriage, you've leveraged your personal relationship into nebulous but vast responsibilities. Constitutional norms and security clearances are just suggestions.",
+          "attributeBonus": {"Flattery": 2, "Cunning": 1}
+        },
+        "Cabinet Secretary": {
+          "description": "Department head attempting to implement actual policy while flying under the radar. Your goal is to avoid presidential attention, tweets, or random policy reversals in your domain.",
+          "attributeBonus": {"Cunning": 2, "Spin": 1}
+        }
+      }
+    },
+    "background": {
+      "description": "Choose your pre-White House background",
+      "content": {
+        "Business Executive": {
+          "description": "Former corporate leader from Trump's world of gold-plated capitalism. You speak his language of deals and ratings, though you're disturbed to learn government can't declare bankruptcy.",
+          "attributeBonus": {"Flattery": 2, "Crisis Management": 1}
+        },
+        "Political Operative": {
+          "description": "Career Washington insider who's survived multiple administrations. Your Rolodex is legendary, but you've never seen chaos like this and your antacid budget has tripled.",
+          "attributeBonus": {"Cunning": 2, "Spin": 1}
+        },
+        "Military Veteran": {
+          "description": "Disciplined former officer bringing structure to the White House. Your combat experience prepared you for danger but not for defending tweets about shark documentaries at 2AM.",
+          "attributeBonus": {"Patience": 2, "Crisis Management": 1}
+        },
+        "TV Personality": {
+          "description": "Media-savvy communicator who understands the President's true constituency is cable news. You know exactly which camera to look at while delivering talking points that border on fiction.",
+          "attributeBonus": {"Media Savvy": 2, "Spin": 1}
+        },
+        "Campaign Loyalist": {
+          "description": "True believer who's been there since the escalator ride. Your unwavering devotion has earned you a place in the inner circle, though your job description changes hourly.",
+          "attributeBonus": {"Loyalty Signaling": 2, "Patience": 1}
+        }
+      }
+    }
+  }
+ }
+ 
+ 
