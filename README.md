@@ -75,12 +75,32 @@ This project was built as a flexible game engine to support interactive storytel
 
 - Adding audio feedback to bring the gameplay to life.
 
-🧠 Example Scenarios
+Example Scenarios
 - 🧒 Parenting (original demo)
 
 - 🏛️ White House Advisor
 
 
 To add new scenarios, simply create a new JSON under src/scenarios/ with proper attributes and story logic.
+
+
+## 🚀 Future Improvements
+
+While the current version showcases a functional and immersive interactive experience, there are several planned enhancements to elevate storytelling and player engagement even further:
+
+- **Character Visuals**  
+  Incorporate character portraits or avatar images to provide a more vivid sense of identity and immersion.
+
+- **Rich Audio Feedback**  
+  Expand audio interactivity with expressive sound effects or synthesized human voice reactions to enhance emotional depth.
+
+- **Layout Refinement**  
+  Experiment with alternative UI layouts to improve information hierarchy and make key components (like choices or stats) feel more compact and focused.
+
+- **Improved Rollback Mechanism**  
+  Add smarter backtracking support that lets users revisit previous decisions or re-trigger actions while maintaining narrative consistency.
+
+- **Scenario Customization UI**  
+  Consider developing a visual scenario editor to simplify the creation of branching storylines for non-developer users.
 
 Enjoy!
