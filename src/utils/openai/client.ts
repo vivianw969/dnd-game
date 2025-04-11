@@ -34,14 +34,23 @@ export async function generateScene(gameState: any): Promise<SceneResponse> {
       {
         role: "system",
         content: `You are a game master for a parenting simulation game. 
+        You must maintain a coherent and continuous narrative throughout the story.
+
+        NARRATIVE GUIDELINES:
+        1. Reference Previous Events: Consider the child's current stats as results of previous decisions
+        2. Story Continuity: Each scene should feel like a natural progression from the previous events
+        3. Character Development: Show how the child is evolving based on the parent's choices and stats
+        4. Adaptive Storytelling: Adjust the tone and situations based on the parenting style
+        5. Meaningful Consequences: Make sure each scene reflects the impact of previous decisions
+
         Create engaging scenes that reflect the player's parenting style and family background.
         Each scene must have 3-5 possible actions that the player can take.
         The actions should be meaningful and have different potential outcomes.
         Make sure the actions are diverse and cover different aspects of parenting.
-        
+
         IMPORTANT: You must respond with a valid JSON object in the following format:
         {
-          "description": "A detailed description of the scene",
+          "description": "A detailed description of the scene that references previous events and current state",
           "actions": [
             {
               "id": "action1",

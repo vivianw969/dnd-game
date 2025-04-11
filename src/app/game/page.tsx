@@ -11,8 +11,10 @@ import { fadeIn, staggerContainer } from '@/utils/motion';
 import DiceRoll from '@/components/DiceRoll';
 import { ACHIEVEMENTS } from '@/constants/achievements';
 import { AchievementManager } from '@/utils/achievementManager';
+import AudioManager from '@/utils/audio/audioManager';
+import AudioControls from '@/components/AudioControls';
 
-// 添加 Space Grotesk 字体导入
+// Import Space Grotesk font
 import { Space_Grotesk } from 'next/font/google';
 
 const spaceGrotesk = Space_Grotesk({ 
@@ -418,7 +420,7 @@ export default function GamePage() {
       listStyle: 'none',
       padding: 0,
     },
-    effectItem: {
+    effectItemList: {
       marginBottom: '0.5rem',
     },
     effectName: {
@@ -429,12 +431,15 @@ export default function GamePage() {
     },
   };
 
+  // Add audio manager initialization
+  const audioManager = AudioManager.getInstance();
+
   useEffect(() => {
-    const checkAuth = async () => {
-      try {
+  const checkAuth = async () => {
+    try {
         const user = await getCurrentUser();
         if (!user) {
-          router.push('/login');
+      router.push('/login');
           return;
         }
         setIsAuthenticated(true);
@@ -445,15 +450,15 @@ export default function GamePage() {
           await loadSavedGame();
         } else if (searchParams.get('parentingStyle')) {
           // Initialize new game with user's choices
-          await loadInitialScene();
+        await loadInitialScene();
         } else {
           router.push('/mode');
-        }
-      } catch (error) {
+      }
+    } catch (error) {
         console.error('Error checking authentication:', error);
         router.push('/login');
-      }
-    };
+    }
+  };
 
     checkAuth();
   }, [router, searchParams]);
@@ -503,18 +508,22 @@ export default function GamePage() {
     }
   };
 
+  // Modify rollDice to include sound effects
   const rollDice = () => {
+    audioManager.playEffect('dice');
     const newValue = Math.floor(Math.random() * 20) + 1;
     return newValue;
   };
 
+  // Modify handleAction to include sound effects
   const handleAction = async (action: Scene['actions'][0]) => {
     try {
-      // 检查是否需要特定属性
+      audioManager.playEffect('button');
+      // Check if specific attribute is required
       if (action.requiredAttribute && action.requiredAttribute !== 'none') {
         const attributeValue = gameState.character.stats.attributes[action.requiredAttribute as keyof typeof gameState.character.stats.attributes];
         if (attributeValue < 10) {
-          setError(`需要 ${action.requiredAttribute} 属性达到10点才能选择此选项。`);
+          setError(`You need ${action.requiredAttribute} attribute to reach 10 points to choose this option.`);
           return;
         }
       }
@@ -532,7 +541,7 @@ export default function GamePage() {
         setDiceValue(finalRoll);
         setIsRolling(false);
         
-        // 调用 processActionResult 来处理动作结果
+        // Call processActionResult to handle action result
         await processActionResult(action, finalRoll);
       }, 1000);
     } catch (error) {
@@ -550,7 +559,7 @@ export default function GamePage() {
       console.log('Received action result:', result);
       setActionResult(result);
       
-      // 更新游戏状态并检查成就
+      // Update game state and check achievements
       setGameState(prev => {
         const newState = {
           ...prev,
@@ -569,7 +578,7 @@ export default function GamePage() {
           },
         };
 
-        // 检查成就
+        // Check achievements
         const achievementManager = AchievementManager.getInstance();
         const newAcademicPerformance = newState.child.academicPerformance;
         if (newAcademicPerformance >= 15 && !achievementManager.hasAchievement('HARD_WORKER')) {
@@ -594,7 +603,7 @@ export default function GamePage() {
     try {
       setIsLoading(true);
       setActionResult(null);
-      // 重置骰子数值
+      // Reset dice value
       setDiceValue(null);
       setIsRolling(false);
       
@@ -772,6 +781,14 @@ export default function GamePage() {
     }
   };
 
+  // Add useEffect for background music
+  useEffect(() => {
+    audioManager.playBackgroundMusic();
+    return () => {
+      audioManager.pauseBackgroundMusic();
+    };
+  }, []);
+
   if (error) {
     return (
       <div style={styles.container}>
@@ -797,6 +814,7 @@ export default function GamePage() {
           </div>
           </motion.div>
         </motion.div>
+        <AudioControls />
       </div>
     );
   }
@@ -889,7 +907,7 @@ export default function GamePage() {
             </div>
             </motion.div>
 
-          {/* Dice Roll Animation - 移动到场景描述下方 */}
+          {/* Dice Roll Animation - Move below scene description */}
           {isRolling && <DiceRoll isRolling={isRolling} diceValue={diceValue} />}
 
           {/* Character Info */}
@@ -904,7 +922,7 @@ export default function GamePage() {
               </div>
             </div>
             
-            {/* 属性值展示面板 */}
+            {/* Attribute Value Display Panel */}
             <div style={styles.childPanel}>
               <h2 style={{ ...styles.panelTitle, color: '#03DAC6' }}>Attributes</h2>
               
@@ -1070,7 +1088,7 @@ export default function GamePage() {
                 <h4 style={styles.effectsTitle}>Effects:</h4>
                 <ul style={styles.effectsList}>
                   {Object.entries(actionResult.effects).map(([key, value]) => (
-                    <li key={key} style={styles.effectItem}>
+                    <li key={key} style={styles.effectItemList}>
                       <span style={styles.effectName}>{key.replace(/([A-Z])/g, ' $1').trim()}:</span>
                       <span style={{
                         ...styles.effectValue,
@@ -1095,7 +1113,7 @@ export default function GamePage() {
         </motion.div>
       </motion.div>
 
-      {/* 成就提示 */}
+      {/* Achievement Notification */}
       {showAchievement && (
         <div
           style={{
@@ -1126,6 +1144,7 @@ export default function GamePage() {
           </div>
         </div>
       )}
+      <AudioControls />
     </div>
   );
 }

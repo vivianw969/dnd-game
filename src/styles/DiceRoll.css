@@ -1,4 +1,4 @@
-/* 3D骰子样式 */
+/* 3D Dice Styles */
 .dice-container {
   margin: auto auto;
   position: relative;
@@ -57,35 +57,35 @@
   height: 86px;
 }
 
-/* 面1-5 */
+/* Faces 1-5 */
 .face:nth-child(1) { transform: rotateY(0deg) translateZ(33.5px) translateY(-12.9px) rotateX(53deg); }
 .face:nth-child(2) { transform: rotateY(-72deg) translateZ(33.5px) translateY(-12.9px) rotateX(53deg); }
 .face:nth-child(3) { transform: rotateY(-144deg) translateZ(33.5px) translateY(-12.9px) rotateX(53deg); }
 .face:nth-child(4) { transform: rotateY(-216deg) translateZ(33.5px) translateY(-12.9px) rotateX(53deg); }
 .face:nth-child(5) { transform: rotateY(-288deg) translateZ(33.5px) translateY(-12.9px) rotateX(53deg); }
 
-/* 面16-20 */
+/* Faces 16-20 */
 .face:nth-child(16) { transform: rotateY(36deg) translateZ(33.5px) translateY(67.08px) rotateZ(180deg) rotateX(53deg); }
 .face:nth-child(17) { transform: rotateY(108deg) translateZ(33.5px) translateY(67.08px) rotateZ(180deg) rotateX(53deg); }
 .face:nth-child(18) { transform: rotateY(180deg) translateZ(33.5px) translateY(67.08px) rotateZ(180deg) rotateX(53deg); }
 .face:nth-child(19) { transform: rotateY(252deg) translateZ(33.5px) translateY(67.08px) rotateZ(180deg) rotateX(53deg); }
 .face:nth-child(20) { transform: rotateY(324deg) translateZ(33.5px) translateY(67.08px) rotateZ(180deg) rotateX(53deg); }
 
-/* 面6-10 */
+/* Faces 6-10 */
 .face:nth-child(6) { transform: rotateY(0deg) translateZ(75px) translateY(55.08px) rotateZ(180deg) rotateX(-11deg); }
 .face:nth-child(7) { transform: rotateY(-72deg) translateZ(75px) translateY(55.08px) rotateZ(180deg) rotateX(-11deg); }
 .face:nth-child(8) { transform: rotateY(-144deg) translateZ(75px) translateY(55.08px) rotateZ(180deg) rotateX(-11deg); }
 .face:nth-child(9) { transform: rotateY(-216deg) translateZ(75px) translateY(55.08px) rotateZ(180deg) rotateX(-11deg); }
 .face:nth-child(10) { transform: rotateY(-288deg) translateZ(75px) translateY(55.08px) rotateZ(180deg) rotateX(-11deg); }
 
-/* 面11-15 */
+/* Faces 11-15 */
 .face:nth-child(11) { transform: rotateY(36deg) translateZ(75px) translateY(55.08px) rotateX(-11deg); }
 .face:nth-child(12) { transform: rotateY(108deg) translateZ(75px) translateY(55.08px) rotateX(-11deg); }
 .face:nth-child(13) { transform: rotateY(180deg) translateZ(75px) translateY(55.08px) rotateX(-11deg); }
 .face:nth-child(14) { transform: rotateY(252deg) translateZ(75px) translateY(55.08px) rotateX(-11deg); }
 .face:nth-child(15) { transform: rotateY(324deg) translateZ(75px) translateY(55.08px) rotateX(-11deg); }
 
-/* 骰子提示框样式 */
+/* Dice Tooltip Styles */
 .dice-tooltip {
   position: absolute;
   bottom: 100%;

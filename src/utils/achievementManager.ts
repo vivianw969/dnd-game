@@ -2,7 +2,7 @@ import { ACHIEVEMENTS, AchievementId } from '@/constants/achievements';
 
 const STORAGE_KEY = 'game_achievements';
 
-// 默认解锁的成就
+// Default unlocked achievements
 const DEFAULT_UNLOCKED_ACHIEVEMENTS = ['OFFER_CLAIMER'];
 
 export class AchievementManager {
@@ -15,7 +15,7 @@ export class AchievementManager {
       ...savedAchievements,
       ...DEFAULT_UNLOCKED_ACHIEVEMENTS
     ]);
-    // 确保默认成就被保存
+    // Ensure default achievements are saved
     this.saveAchievements();
   }
 

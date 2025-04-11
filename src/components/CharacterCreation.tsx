@@ -177,7 +177,7 @@ export default function CharacterCreation() {
       router.push('/game');
     } catch (error) {
       console.error('Error creating character:', error);
-      // TODO: 添加错误提示UI
+      // TODO: Add error message UI
     } finally {
       setIsLoading(false);
     }

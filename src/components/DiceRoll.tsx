@@ -12,18 +12,18 @@ const DiceRoll = ({ isRolling, diceValue }: DiceRollProps) => {
   const [currentFace, setCurrentFace] = useState<number | null>(null);
   const [isRollingState, setIsRollingState] = useState(false);
 
-  // 当骰子值变化时，更新当前面
+  // Update current face when dice value changes
   useEffect(() => {
     if (diceValue !== null) {
       setCurrentFace(diceValue);
     }
   }, [diceValue]);
 
-  // 当isRolling变化时，更新滚动状态
+  // Update rolling state when isRolling changes
   useEffect(() => {
     if (isRolling) {
       setIsRollingState(true);
-      // 滚动结束后重置状态
+      // Reset state after rolling ends
       const timer = setTimeout(() => {
         setIsRollingState(false);
       }, 3000);
@@ -31,7 +31,7 @@ const DiceRoll = ({ isRolling, diceValue }: DiceRollProps) => {
     }
   }, [isRolling]);
 
-  // 生成20个面的骰子
+  // Generate 20-sided dice
   const renderFaces = () => {
     const faces = [];
     for (let i = 1; i <= 20; i++) {
@@ -74,7 +74,7 @@ const DiceRoll = ({ isRolling, diceValue }: DiceRollProps) => {
           </div>
         </div>
         
-        {/* 骰子提示框 */}
+        {/* Dice Tooltip */}
         {showTooltip && (
           <motion.div
             initial={{ opacity: 0, y: 10 }}
