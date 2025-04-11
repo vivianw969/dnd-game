@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { createClient } from '@/utils/supabase/client';
+import { supabase } from '@/utils/supabase/client';
 import { generateScene, generateActionResult } from '@/utils/openai/client';
 import type { SceneResponse, ActionResultResponse } from '@/utils/openai/client';
 
@@ -48,6 +48,34 @@ interface Scene {
   actions: GameAction[];
 }
 
+// Helper function to get initial child values based on character attributes
+function getInitialChildValue(stat: string, attributes: any): number {
+  switch (stat) {
+    case 'mood':
+      // Mood is affected by emotionalTactics and tigerDiscipline (inverse)
+      return Math.max(0, Math.min(100, 
+        (attributes.emotionalTactics - 10) * 2 - (attributes.tigerDiscipline - 10)
+      ));
+    case 'academicPerformance':
+      // Academic performance is affected by academicPressure and resourceManagement
+      return Math.max(0, Math.min(100, 
+        (attributes.academicPressure - 10) * 3 + (attributes.resourceManagement - 10)
+      ));
+    case 'socialLife':
+      // Social life is affected by socialEngineering and emotionalTactics
+      return Math.max(0, Math.min(100, 
+        (attributes.socialEngineering - 10) * 2 + (attributes.emotionalTactics - 10)
+      ));
+    case 'culturalConnection':
+      // Cultural connection is affected by familyHonor and socialEngineering
+      return Math.max(0, Math.min(100, 
+        (attributes.familyHonor - 10) * 2 + (attributes.socialEngineering - 10)
+      ));
+    default:
+      return 0;
+  }
+}
+
 export default function GameScene() {
   const [gameState, setGameState] = useState<GameState | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -59,7 +87,6 @@ export default function GameScene() {
   useEffect(() => {
     const loadGameState = async () => {
       try {
-        const supabase = createClient();
         const { data: { user } } = await supabase.auth.getUser();
 
         if (!user) {
@@ -74,19 +101,25 @@ export default function GameScene() {
 
         if (error) throw error;
 
+        // Load scenario file
+        const response = await fetch('/examples/parenting.json');
+        const scenario = await response.json();
+
+        // Get initial values from scenario file
+        const initialAttributes = character.stats.attributes;
         const initialState: GameState = {
-          currentScene: 'firstParentTeacherConference',
+          currentScene: scenario.startingPoint,
           character: {
             name: character.name,
             stats: character.stats,
           },
           child: {
             name: 'Alex',
-            age: 10,
-            mood: 50,
-            academicPerformance: 50,
-            socialLife: 50,
-            culturalConnection: 50,
+            age: 8,
+            mood: getInitialChildValue('mood', initialAttributes),
+            academicPerformance: getInitialChildValue('academicPerformance', initialAttributes),
+            socialLife: getInitialChildValue('socialLife', initialAttributes),
+            culturalConnection: getInitialChildValue('culturalConnection', initialAttributes),
           },
         };
 

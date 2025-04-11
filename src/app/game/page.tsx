@@ -9,6 +9,8 @@ import { GameState } from '@/types/game';
 import { supabase } from '@/utils/supabase/client';
 import { fadeIn, staggerContainer } from '@/utils/motion';
 import DiceRoll from '@/components/DiceRoll';
+import { ACHIEVEMENTS } from '@/constants/achievements';
+import { AchievementManager } from '@/utils/achievementManager';
 
 // 添加 Space Grotesk 字体导入
 import { Space_Grotesk } from 'next/font/google';
@@ -44,6 +46,33 @@ export default function GamePage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [gameState, setGameState] = useState<GameState>(() => {
+    // Only initialize if we have parentingStyle in URL params (indicating new game)
+    if (!searchParams.get('parentingStyle')) {
+      return {
+        character: {
+          stats: {
+            parentingStyle: '',
+            familyBackground: '',
+            attributes: {
+              academicPressure: 0,
+              tigerDiscipline: 0,
+              socialEngineering: 0,
+              familyHonor: 0,
+              resourceManagement: 0,
+              emotionalTactics: 0,
+            }
+          },
+        },
+        child: {
+          age: 0,
+          mood: 0,
+          academicPerformance: 0,
+          socialLife: 0,
+          culturalConnection: 0,
+        },
+      };
+    }
+
     const initialAttributes = {
       academicPressure: getInitialAttributeValue(searchParams.get('parentingStyle'), 'academicPressure'),
       tigerDiscipline: getInitialAttributeValue(searchParams.get('parentingStyle'), 'tigerDiscipline'),
@@ -78,6 +107,12 @@ export default function GamePage() {
   const [error, setError] = useState<string | null>(null);
   const [user, setUser] = useState<any>(null);
   const [saveStatus, setSaveStatus] = useState<{ type: 'success' | 'error' | null; message: string }>({ type: null, message: '' });
+  const [achievements, setAchievements] = useState<Set<string>>(new Set());
+  const [showAchievement, setShowAchievement] = useState<{
+    title: string;
+    description: string;
+    icon: string;
+  } | null>(null);
 
   // Styling from first page
   const styles = {
@@ -136,7 +171,7 @@ export default function GamePage() {
       marginBottom: '1.5rem',
     },
     title: {
-      fontSize: '1.75rem',
+      fontSize: '1.5rem',
       fontWeight: 'bold',
       color: '#BB86FC',
       letterSpacing: '0.02em',
@@ -149,7 +184,7 @@ export default function GamePage() {
     primaryButton: {
       background: 'linear-gradient(135deg, #8E24AA 0%, #BB86FC 100%)',
       color: 'white',
-      padding: '0.75rem 1rem',
+      padding: '0.5rem 0.75rem',
       borderRadius: '0.5rem',
       border: 'none',
       cursor: 'pointer',
@@ -176,60 +211,60 @@ export default function GamePage() {
       transition: 'all 0.3s ease',
     },
     infoPanel: {
-      display: 'grid',
-      gridTemplateColumns: '1fr 1fr',
-      gap: '1rem',
-      marginBottom: '1.5rem',
+      display: 'flex',
+      gap: '0.5rem',
+      marginBottom: '0.75rem',
     },
     characterPanel: {
+      flex: '0 0 30%',
       background: 'rgba(187, 134, 252, 0.1)',
-      borderRadius: '0.75rem',
-      padding: '1rem',
-      fontSize: '0.75rem',
-      border: '1px solid rgba(187, 134, 252, 0.2)',
+      borderRadius: '0.5rem',
+      padding: '0.5rem',
+      fontSize: '0.7rem',
     },
     childPanel: {
+      flex: '1',
       background: 'rgba(3, 218, 198, 0.1)',
-      borderRadius: '0.75rem',
-      padding: '1rem',
-      fontSize: '0.75rem',
-      border: '1px solid rgba(3, 218, 198, 0.2)',
+      borderRadius: '0.5rem',
+      padding: '0.5rem',
+      fontSize: '0.7rem',
     },
     panelTitle: {
-      fontSize: '1.25rem',
+      fontSize: '1rem',
       fontWeight: '600',
-      marginBottom: '0.5rem',
+      marginBottom: '0.25rem',
       color: '#BB86FC',
       letterSpacing: '0.02em',
       fontFamily: spaceGrotesk.style.fontFamily,
     },
     panelText: {
       color: 'rgba(255, 255, 255, 0.8)',
+      marginBottom: '0.25rem',
     },
     statsGrid: {
       display: 'grid',
       gridTemplateColumns: 'repeat(2, 1fr)',
-      gap: '1rem',
-      marginBottom: '1.5rem',
+      gap: '0.75rem',
+      marginBottom: '1rem',
     },
     statContainer: {
       background: 'rgba(30, 30, 30, 0.5)',
       borderRadius: '0.75rem',
-      padding: '1rem',
+      padding: '0.75rem',
       border: '1px solid rgba(255, 255, 255, 0.05)',
     },
     statTitle: {
-      fontSize: '0.875rem',
+      fontSize: '0.75rem',
       fontWeight: '600',
-      marginBottom: '0.5rem',
+      marginBottom: '0.25rem',
     },
     statBarContainer: {
       width: '100%',
-      height: '0.5rem',
+      height: '0.4rem',
       background: 'rgba(255, 255, 255, 0.1)',
       borderRadius: '0.25rem',
       overflow: 'hidden',
-      marginBottom: '0.25rem',
+      marginBottom: '0.2rem',
     },
     statFlexDisplay: {
       display: 'flex',
@@ -238,29 +273,28 @@ export default function GamePage() {
     },
     sceneContainer: {
       background: 'rgba(255, 255, 255, 0.05)',
-      borderRadius: '0.75rem',
-      padding: '1.5rem',
-      marginBottom: '1.5rem',
-      border: '1px solid rgba(255, 255, 255, 0.1)',
+      borderRadius: '0.5rem',
+      padding: '0.75rem',
+      marginBottom: '0.75rem',
     },
     sceneDescription: {
-      marginBottom: '1.5rem',
-      lineHeight: '1.6',
-      fontSize: '1.2rem',
+      marginBottom: '0.75rem',
+      lineHeight: '1.3',
+      fontSize: '1rem',
       fontFamily: spaceGrotesk.style.fontFamily,
       letterSpacing: '0.01em',
     },
     actionsGrid: {
       display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-      gap: '1rem',
+      gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+      gap: '0.4rem',
     },
     actionButton: {
+      padding: '0.5rem',
+      fontSize: '0.85rem',
+      borderRadius: '0.5rem',
+      minHeight: '2.5rem',
       background: 'rgba(255, 255, 255, 0.1)',
-      borderRadius: '0.75rem',
-      padding: '1rem',
-      fontSize: '1rem',
-      textAlign: 'left',
       border: '1px solid rgba(255, 255, 255, 0.1)',
       cursor: 'pointer',
       transition: 'all 0.3s ease',
@@ -348,11 +382,9 @@ export default function GamePage() {
       border: '1px solid rgba(207, 102, 121, 0.4)',
     },
     actionResult: {
-      background: 'rgba(3, 218, 198, 0.1)',
-      borderRadius: '0.75rem',
-      padding: '1.5rem',
-      marginBottom: '1.5rem',
-      border: '1px solid rgba(3, 218, 198, 0.2)',
+      padding: '0.75rem',
+      marginBottom: '0.75rem',
+      fontSize: '0.9rem',
     },
     resultTitle: {
       fontSize: '1.25rem',
@@ -513,27 +545,14 @@ export default function GamePage() {
         setDiceValue(rollDice());
       }, 100);
 
-      setTimeout(() => {
+      setTimeout(async () => {
         clearInterval(rollInterval);
         const finalRoll = rollDice();
         setDiceValue(finalRoll);
         setIsRolling(false);
         
-        // 根据骰子点数判断成功或失败 - 修改为适应20面骰子
-        // 在20面骰子中，1-10为失败，11-20为成功
-        const success = finalRoll >= 11; // 11点及以上算成功
-        const resultPrefix = success ? "Yes! " : "Oh no! ";
-        const result = resultPrefix + (success ? action.successText : action.failureText);
-        
-        setActionResult({
-          description: result,
-          effects: {
-            mood: success ? 5 : -5,
-            academicPerformance: success ? 5 : -5,
-            socialLife: success ? 5 : -5,
-            culturalConnection: success ? 5 : -5
-          }
-        });
+        // 调用 processActionResult 来处理动作结果
+        await processActionResult(action, finalRoll);
       }, 1000);
     } catch (error) {
       console.error('Error handling action:', error);
@@ -550,22 +569,38 @@ export default function GamePage() {
       console.log('Received action result:', result);
       setActionResult(result);
       
-      setGameState(prev => ({
-        ...prev,
-        child: {
-          ...prev.child,
-          mood: Math.max(-100, Math.min(100, prev.child.mood + result.effects.mood)),
-          academicPerformance: Math.max(
-            -100,
-            Math.min(100, prev.child.academicPerformance + result.effects.academicPerformance)
-          ),
-          socialLife: Math.max(-100, Math.min(100, prev.child.socialLife + result.effects.socialLife)),
-          culturalConnection: Math.max(
-            -100,
-            Math.min(100, prev.child.culturalConnection + result.effects.culturalConnection)
-          ),
-        },
-      }));
+      // 更新游戏状态并检查成就
+      setGameState(prev => {
+        const newState = {
+          ...prev,
+          child: {
+            ...prev.child,
+            mood: Math.max(-100, Math.min(100, prev.child.mood + result.effects.mood)),
+            academicPerformance: Math.max(
+              -100,
+              Math.min(100, prev.child.academicPerformance + result.effects.academicPerformance)
+            ),
+            socialLife: Math.max(-100, Math.min(100, prev.child.socialLife + result.effects.socialLife)),
+            culturalConnection: Math.max(
+              -100,
+              Math.min(100, prev.child.culturalConnection + result.effects.culturalConnection)
+            ),
+          },
+        };
+
+        // 检查成就
+        const achievementManager = AchievementManager.getInstance();
+        const newAcademicPerformance = newState.child.academicPerformance;
+        if (newAcademicPerformance >= 15 && !achievementManager.hasAchievement('HARD_WORKER')) {
+          console.log('Achievement unlocked: Hard Worker');
+          if (achievementManager.unlockAchievement('HARD_WORKER')) {
+            setShowAchievement(ACHIEVEMENTS.HARD_WORKER);
+            setTimeout(() => setShowAchievement(null), 3000);
+          }
+        }
+
+        return newState;
+      });
     } catch (error) {
       console.error('Error processing action result:', error);
       setError(`Failed to process action: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -1049,6 +1084,38 @@ export default function GamePage() {
           )}
         </motion.div>
       </motion.div>
+
+      {/* 成就提示 */}
+      {showAchievement && (
+        <div
+          style={{
+            position: 'fixed',
+            top: '20px',
+            right: '20px',
+            background: 'rgba(30, 30, 30, 0.9)',
+            borderRadius: '0.5rem',
+            padding: '1rem',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.75rem',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+            border: '1px solid rgba(187, 134, 252, 0.3)',
+            zIndex: 1000,
+            animation: 'slideIn 0.3s ease-out'
+          }}
+        >
+          <div style={{ fontSize: '2rem' }}>{showAchievement.icon}</div>
+          <div>
+            <div style={{ color: '#BB86FC', fontWeight: 'bold', marginBottom: '0.25rem' }}>
+              Achievement Unlocked!
+            </div>
+            <div style={{ color: '#ffffff', fontWeight: 'bold' }}>{showAchievement.title}</div>
+            <div style={{ color: '#ffffff', opacity: 0.8, fontSize: '0.875rem' }}>
+              {showAchievement.description}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

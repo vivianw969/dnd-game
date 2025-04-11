@@ -3,41 +3,18 @@
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { fadeIn, staggerContainer } from '@/utils/motion';
-import { FC } from 'react';
-
-const achievements = [
-  {
-    id: 'rat_racer_king',
-    title: 'Rat Racer King',
-    description: 'Master of the corporate ladder',
-    icon: '👑',
-    color: '#BB86FC'
-  },
-  {
-    id: 'offer_claimer',
-    title: 'Offer Claimer',
-    description: 'Successfully negotiated multiple job offers',
-    icon: '📝',
-    color: '#03DAC6'
-  },
-  {
-    id: 'mentor_master',
-    title: 'Mentor Master',
-    description: 'Guided others to success',
-    icon: '🎓',
-    color: '#FFD54F'
-  },
-  {
-    id: 'work_life_hero',
-    title: 'Work-Life Hero',
-    description: 'Achieved perfect balance in career and life',
-    icon: '⚖️',
-    color: '#CF6679'
-  }
-];
+import { FC, useEffect, useState } from 'react';
+import { ACHIEVEMENTS, Achievement } from '@/constants/achievements';
+import { AchievementManager } from '@/utils/achievementManager';
 
 const AchievementPage: FC = () => {
   const router = useRouter();
+  const [unlockedAchievements, setUnlockedAchievements] = useState<Achievement[]>([]);
+
+  useEffect(() => {
+    const achievementManager = AchievementManager.getInstance();
+    setUnlockedAchievements(achievementManager.getUnlockedAchievements());
+  }, []);
 
   const styles = {
     container: {
@@ -190,38 +167,55 @@ const AchievementPage: FC = () => {
             variants={fadeIn('up', 'tween', 0.5, 1)}
             style={styles.achievementsList}
           >
-            {achievements.map((achievement, index) => (
-              <motion.div
-                key={achievement.id}
-                variants={fadeIn('up', 'tween', 0.6 + index * 0.1, 1)}
-                style={styles.achievementCard}
-                whileHover={{ 
-                  scale: 1.02,
-                  boxShadow: '0 8px 20px rgba(0, 0, 0, 0.2)',
-                }}
-              >
-                <div 
-                  style={{
-                    ...styles.achievementIcon,
-                    background: `${achievement.color}20`,
-                    color: achievement.color,
-                  }}
-                >
-                  {achievement.icon}
-                </div>
-                <div style={styles.achievementInfo}>
-                  <h3 style={{
-                    ...styles.achievementTitle,
-                    color: achievement.color,
-                  }}>
-                    {achievement.title}
-                  </h3>
-                  <p style={styles.achievementDescription}>
-                    {achievement.description}
-                  </p>
-                </div>
-              </motion.div>
-            ))}
+            {Object.values(ACHIEVEMENTS)
+              .sort((a, b) => {
+                const aUnlocked = unlockedAchievements.some(ua => ua.id === a.id);
+                const bUnlocked = unlockedAchievements.some(ua => ua.id === b.id);
+                // 已解锁的排在前面
+                if (aUnlocked && !bUnlocked) return -1;
+                if (!aUnlocked && bUnlocked) return 1;
+                // 如果解锁状态相同，保持原有顺序
+                return 0;
+              })
+              .map((achievement, index) => {
+                const isUnlocked = unlockedAchievements.some(a => a.id === achievement.id);
+                return (
+                  <motion.div
+                    key={achievement.id}
+                    variants={fadeIn('up', 'tween', 0.6 + index * 0.1, 1)}
+                    style={{
+                      ...styles.achievementCard,
+                      opacity: isUnlocked ? 1 : 0.5,
+                      filter: isUnlocked ? 'none' : 'grayscale(1)',
+                    }}
+                    whileHover={isUnlocked ? { 
+                      scale: 1.02,
+                      boxShadow: '0 8px 20px rgba(0, 0, 0, 0.2)',
+                    } : {}}
+                  >
+                    <div 
+                      style={{
+                        ...styles.achievementIcon,
+                        background: `${achievement.color}20`,
+                        color: achievement.color,
+                      }}
+                    >
+                      {achievement.icon}
+                    </div>
+                    <div style={styles.achievementInfo}>
+                      <h3 style={{
+                        ...styles.achievementTitle,
+                        color: achievement.color,
+                      }}>
+                        {achievement.title}
+                      </h3>
+                      <p style={styles.achievementDescription}>
+                        {achievement.description}
+                      </p>
+                    </div>
+                  </motion.div>
+                );
+              })}
           </motion.div>
 
           <motion.button
