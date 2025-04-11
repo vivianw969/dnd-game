@@ -40,8 +40,8 @@ Players choose roles and make decisions that dynamically shape the narrative. Sc
 ### 🛠 Installation
 
 ```bash
-git clone https://github.com/vivianw969/parent-ai-game.git
-cd parent-ai-game
+git clone https://github.com/vivianw969/dnd-game.git
+cd dnd-game
 npm install
 
 ```
