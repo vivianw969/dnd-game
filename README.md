@@ -1,36 +1,86 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🎮 AI Adventure Engine
 
-## Getting Started
+**An extensible, AI-powered, text-based storytelling platform** inspired by *Dungeons & Dragons*.  
+Players choose roles and make decisions that dynamically shape the narrative. Scenarios are fully customizable — parenting is just one example.
 
-First, run the development server:
+---
+
+## 🌟 Features
+
+- 🎲 **AI-Generated Scenes**  
+  Powered by OpenAI to create fresh content every playthrough.
+  
+- 🧠 **Character Customization**  
+  Roles with attribute bonuses, customizable skills and stats.
+
+- 🎧 **Audio Feedback**  
+  Dice rolls and scene transitions come alive with sound.
+
+- 📜 **Dynamic Decision-Making**  
+  Each action triggers stat checks and randomized outcomes (D20 dice).
+
+- 🧩 **Modular Scenarios**  
+  Easily swap out scenarios via JSON files (fantasy, political, parenting, etc.)
+
+- 🔐 **Authentication + Save/Load**  
+  Supabase-backed auth and persistent progress.
+
+---
+
+## ⚙️ Setup Instructions
+
+### 📦 Prerequisites
+
+- [Node.js](https://nodejs.org/) v16+
+- [Supabase](https://supabase.com/) project (Auth + `games` table)
+- OpenAI API Key
+
+---
+
+### 🛠 Installation
 
 ```bash
+git clone https://github.com/vivianw969/parent-ai-game.git
+cd parent-ai-game
+npm install
+
+```
+---
+
+### 🔐 Environment Variables
+Create a .env.local file:
+
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+NEXT_PUBLIC_OPENAI_API_KEY=your_openai_key
+
+Running Locally
+```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 💡 Thought Process
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+This project was built as a flexible game engine to support interactive storytelling, not confined to a single theme. Inspired by D&D mechanics, the goal was to blend player choices, RPG attributes, and AI narrative generation into one cohesive experience. Key design decisions include:
 
-## Learn More
+- Using JSON to define scenarios → easy to extend for different domains.
 
-To learn more about Next.js, take a look at the following resources:
+- Building with Next.js App Router and Framer Motion for smooth UI transitions.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- Using Supabase for real-time auth + database support.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- Integrating OpenAI to provide context-aware scene descriptions and action outcomes.
 
-## Deploy on Vercel
+- Adding audio feedback to bring the gameplay to life.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+🧠 Example Scenarios
+- 🧒 Parenting (original demo)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- 🏛️ White House Advisor
+
+
+To add new scenarios, simply create a new JSON under src/scenarios/ with proper attributes and story logic.
+
+Enjoy!
