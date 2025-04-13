@@ -2,6 +2,8 @@
 
 **An extensible, AI-powered, text-based storytelling platform** inspired by *Dungeons & Dragons*.  
 Players choose roles and make decisions that dynamically shape the narrative. Scenarios are fully customizable — parenting is just one example.
+**
+
 Presentation: https://drive.google.com/drive/u/1/my-drive
 ---
 
