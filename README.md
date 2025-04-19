@@ -4,7 +4,7 @@
 Players choose roles and make decisions that dynamically shape the narrative. Scenarios are fully customizable — parenting is just one example.
 
 
-Presentation: https://drive.google.com/drive/u/1/my-drive
+Presentation: https://drive.google.com/file/d/1GdOYefUgIiPfZu6cktZAXdN5twz0YCnW/view?usp=sharing
 ---
 
 ## 🌟 Features
